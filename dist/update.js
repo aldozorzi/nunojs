@@ -11,8 +11,7 @@ import ora from 'ora';
 import { Format } from './lib/format.js';
 import fs from "fs/promises";
 import fse from 'fs-extra/esm';
-import { simpleGit, CleanOptions } from 'simple-git';
-const git = simpleGit().clean(CleanOptions.FORCE);
+import { simpleGit } from 'simple-git';
 export function updatePatterns() {
     return __awaiter(this, void 0, void 0, function* () {
         const spinner = ora({ text: Format.infoColor('Loading patterns...'), color: 'blue' }).start();
@@ -22,6 +21,7 @@ export function updatePatterns() {
             // [TODO] change url to https://github.com/aldozorzi/fabricjs - using https://github.com/danielmiessler/fabric because public
             // const repoPath = 'https://github.com/aldozorzi/fabricjs';
             const repoPath = 'https://github.com/danielmiessler/fabric';
+            const git = simpleGit();
             yield git.clone(repoPath, dir, ['-n', '--depth=1', '--filter=tree:0']);
             git.cwd(dir).raw("sparse-checkout", "set", 'patterns');
             yield git.checkout();

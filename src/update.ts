@@ -4,10 +4,8 @@ import fs from "fs/promises";
 import fse from 'fs-extra/esm';
 import { simpleGit, SimpleGit, CleanOptions } from 'simple-git';
 
-const git: SimpleGit = simpleGit().clean(CleanOptions.FORCE);
-
-
 export async function updatePatterns() {
+    
     const spinner = ora({text:Format.infoColor('Loading patterns...'),color:'blue'}).start();
 
     const dir = './patterns/_updating_patterns';
@@ -17,6 +15,7 @@ export async function updatePatterns() {
         // [TODO] change url to https://github.com/aldozorzi/fabricjs - using https://github.com/danielmiessler/fabric because public
         // const repoPath = 'https://github.com/aldozorzi/fabricjs';
         const repoPath = 'https://github.com/danielmiessler/fabric';
+        const git: SimpleGit = simpleGit();
         await git.clone(repoPath,dir,['-n','--depth=1','--filter=tree:0']);
         git.cwd(dir).raw("sparse-checkout", "set", 'patterns');
         await git.checkout();
