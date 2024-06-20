@@ -1,25 +1,26 @@
 import chalk from 'chalk';
+import logSymbols from 'log-symbols';
 export class Format {
     static success(string, ret = false) {
-        const output = Format.successColor(`\u2713 ${string}`);
+        const output = Format.successColor(`${logSymbols.success} ${string}`);
         if (ret)
             return output;
         console.log(output);
     }
     static error(string, ret = false) {
-        const output = Format.errorColor(`\u26D4 ${string}`);
+        const output = Format.errorColor(`${logSymbols.error} ${string}`);
         if (ret)
             return output;
         console.log(output);
     }
     static info(string, ret = false) {
-        const output = Format.infoColor(`\u2139 ${string}`);
+        const output = Format.infoColor(`${logSymbols.info} ${string}`);
         if (ret)
             return output;
         console.log(output);
     }
     static warning(string, ret = false) {
-        const output = Format.warningColor(`\u26a0 ${string}`);
+        const output = Format.warningColor(`${logSymbols.warning} ${string}`);
         if (ret)
             return output;
         console.log(output);

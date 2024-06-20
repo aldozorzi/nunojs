@@ -30,7 +30,8 @@
     "inquirer": "^9.2.23",
     "openai": "^4.52.0",
     "ora": "^8.0.1",
-    "simple-git": "^3.25.0"
+    "simple-git": "^3.25.0",
+    "log-symbols": "^6.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.5",
