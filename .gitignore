@@ -3,3 +3,5 @@ patterns/dev_*/*
 custom_patterns/*
 output/*
 TODO.MD
+
+code_debugger_typescript
