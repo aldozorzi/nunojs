@@ -1,4 +1,4 @@
-import { getModelsList } from '../listmodels.js';
+import { getModelsList } from '../list_models.js';
 
 export async function checkModel(model:string){
     const modelsList = await getModelsList();

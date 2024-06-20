@@ -4,6 +4,8 @@ import fse from 'fs-extra/esm';
 import { Format } from './lib/format.js';
 import OpenAI from 'openai';
 import Configstore from 'configstore';
+import ora from 'ora';
+import { checkModel } from './lib/checkModel.js';
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
@@ -34,6 +36,7 @@ function getModel() {
 async function loadPattern() {
     if (!options.text || options.text == "")
         return Format.error("Input text not set. Use --text or use piped form (\"text\" | fabricjs [...] ) to set input text.");
+    const spinner = ora({text:Format.infoColor('AI is working hard...'),color:'blue'}).start();
     try {
         let patternFile = `./patterns/${options.pattern}/system.md`;
         const customFile = `./custom_patterns/${options.pattern}/system.md`;
@@ -42,7 +45,7 @@ async function loadPattern() {
         const customFileExists = await fse.pathExists(customFile);
 
         if (!fileExists && !customFileExists)
-            return Format.error(`Pattern "${options.pattern}" doesn't exists`);
+            return spinner.fail(Format.errorColor(`Pattern "${options.pattern}" doesn't exists`));
         else if(customFileExists)
             patternFile = customFile;
 
@@ -65,9 +68,9 @@ async function loadPattern() {
                 try{
                     await fse.ensureFile(options.output);
                     const result = await fs.promises.writeFile(options.output,chatCompletion.choices[0].message.content || "");
-                    Format.success('File saved!');
+                    return spinner.succeed(Format.successColor('File saved!'));
                 }catch (e: any) {
-                    Format.error(e.toString());
+                    spinner.fail(Format.errorColor(e.toString()));
                 }
                 
             } else {
@@ -81,7 +84,7 @@ async function loadPattern() {
             }
         }
     } catch (e: any) {
-        Format.error(e.toString());
+        spinner.fail(Format.errorColor(e.toString()));
     }
 }
 
@@ -89,6 +92,8 @@ export async function processPattern(opt: OptionValues) {
     options = opt;
     if (!config.get('openAiKey'))
         return Format.error('OpenAI key not set. Set your OpenAI key with fabricjs --setup');
+    if(options.model && !await checkModel(options.model))
+        return Format.error('Model not valid: select a model available in --listmodels');
     if (!options.text) {
         loadPipedText();
     }

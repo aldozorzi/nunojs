@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { getModelsList } from '../listmodels.js';
+import { getModelsList } from '../list_models.js';
 export function checkModel(model) {
     return __awaiter(this, void 0, void 0, function* () {
         const modelsList = yield getModelsList();
