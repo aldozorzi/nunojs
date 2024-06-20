@@ -5,7 +5,6 @@ import { processPattern } from "./pattern.js";
 import { initSetup } from "./setup.js";
 import { Format } from "./lib/format.js";
 import { updatePatterns } from "./update.js";
-import { mergePatterns } from "./merge.js";
 import { getList } from "./list.js";
 import { getModels } from './listmodels.js';
 const program = new Command();
@@ -21,7 +20,7 @@ program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use"
     .option("--top_p <top_p>", "Set the top_p for the model. Default is 1")
     .option("--frequency_penalty <frequency_penalty >", "sets the presence penalty for the model. Default is 0.1")
     .option("-u, --update", "Update patterns (git > 2.24 required)")
-    .option("--merge", "Merge custom_patterns in patterns folder")
+    //.option("--merge", "Merge custom_patterns in patterns folder")
     .option("--setup", "Set up your FabricJS instance")
     .option("--listmodels", "List all available models")
     .option("-m, --model <model>", "Set the model to use")
@@ -77,9 +76,9 @@ function loadModule() {
     }
     else if (options.remoteOllamaServer) {
     }
-    else if (options.merge) {
+    /*else if (options.merge) {
         mergePatterns();
-    }
+    }*/
     else if (options.pattern) {
         processPattern(options);
     }

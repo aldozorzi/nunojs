@@ -64,10 +64,14 @@ function loadPattern() {
         if (!options.text || options.text == "")
             return Format.error("Input text not set. Use --text or use piped form (\"text\" | fabricjs [...] ) to set input text.");
         try {
-            const patternFile = `./patterns/${options.pattern}/system.md`;
+            let patternFile = `./patterns/${options.pattern}/system.md`;
+            const customFile = `./custom_patterns/${options.pattern}/system.md`;
             const fileExists = yield fse.pathExists(patternFile);
-            if (!fileExists)
+            const customFileExists = yield fse.pathExists(customFile);
+            if (!fileExists && !customFileExists)
                 return Format.error(`Pattern "${options.pattern}" doesn't exists`);
+            else if (customFileExists)
+                patternFile = customFile;
             const pattern = yield fs.promises.readFile(patternFile, 'utf8');
             const openai = new OpenAI({
                 apiKey: config.get('openAiKey'),
