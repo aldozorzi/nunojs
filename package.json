@@ -1,0 +1,41 @@
+{
+  "name": "fabricjs",
+  "version": "1.0.0",
+  "description": "Fabric JS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I really wanted to use it, but it didn't work on my Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.",
+  "exports": "./dist/index.js",
+  "type": "module",
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "npx tsc",
+    "start": "node dist/index.js",
+    "dev": "tsc --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "bin": {
+    "fabricjs": "./dist/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@types/configstore": "^6.0.2",
+    "@types/fs-extra": "^11.0.4",
+    "@types/inquirer": "^9.0.7",
+    "chalk": "^5.3.0",
+    "commander": "^12.1.0",
+    "configstore": "^6.0.0",
+    "fs-extra": "^11.2.0",
+    "inquirer": "^9.2.23",
+    "openai": "^4.52.0",
+    "ora": "^8.0.1",
+    "simple-git": "^3.25.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.5",
+    "nodemon": "^3.1.3",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.4.5"
+  }
+}

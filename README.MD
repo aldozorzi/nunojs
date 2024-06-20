@@ -1,0 +1,56 @@
+
+# Fabric JS
+
+Fabric JS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.
+
+And then, who knows? Perhaps a web based version?
+
+## Installation
+
+```bash
+
+git  clone  https://github.com/aldozorzi/fabricjs
+
+npm  install -g fabricjs
+
+```
+
+## Usage
+
+To start using FabricJS, simply launch
+
+` fabricjs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.'`
+
+or
+
+` fabricjs -p 'pattern_name' -t 'Science is going to be revolutionized by AI assistants.'`
+
+All patterns are available as sub-command too, so
+
+` fabricjs pattern_name 'Science is going to be revolutionized by AI assistants.' `
+
+is equal to
+
+` fabricjs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.' `
+
+FabricJS accept piped text as input (and returns "pipable" text as output), so you can use something like
+
+` 'Science is going to be revolutionized by AI assistants.' | fabricjs pattern_name `
+
+To print help:
+
+` fabricjs --help`
+
+or
+
+` fabricjs `
+
+## Custom Patterns
+
+Place your custom patterns in "custom_patterns" folder. Create a subfolder named as your pattern and inside it put a file named "system.md". See pattern "official_pattern_template" in "pattern" folder as a reference.
+
+- custom_patterns
+	- pattern_1
+		- system.md
+	- pattern_2
+		- system.md

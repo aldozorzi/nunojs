@@ -1,0 +1,5 @@
+node_modules/*
+patterns/dev_*/*
+custom_patterns/*
+output/*
+TODO.MD
