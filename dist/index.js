@@ -1,12 +1,13 @@
 #! /usr/bin/env node
 import fs from 'fs';
+import { Format } from "./lib/format.js";
 import { Command } from "commander";
 import { processPattern } from "./pattern.js";
 import { initSetup } from "./setup.js";
-import { Format } from "./lib/format.js";
 import { updatePatterns } from "./update.js";
 import { getList } from "./list.js";
-import { getModels } from './listmodels.js';
+import { getModels } from './list_models.js';
+import { defaultModel } from './default_model.js';
 const program = new Command();
 program
     .version("1.0.0")
@@ -20,12 +21,11 @@ program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use"
     .option("--top_p <top_p>", "Set the top_p for the model. Default is 1")
     .option("--frequency_penalty <frequency_penalty >", "sets the presence penalty for the model. Default is 0.1")
     .option("-u, --update", "Update patterns (git > 2.24 required)")
-    //.option("--merge", "Merge custom_patterns in patterns folder")
     .option("--setup", "Set up your FabricJS instance")
-    .option("--listmodels", "List all available models")
+    .option("--list_models", "List all available models")
     .option("-m, --model <model>", "Set the model to use")
-    .option("--setDefaultModel <model>", "Set the default model to use")
-    .option("--remoteOllamaServer <server>", "The URL of the remote ollamaserver to use. ONLY USE THIS if you are using a local ollama server in a non-default location or port");
+    .option("--default_model <model>", "Set the default model to use");
+//.option("--remote_ollama_server <server>", "The URL of the remote ollamaserver to use. ONLY USE THIS if you are using a local ollama server in a non-default location or port");
 const dir = fs.readdirSync('patterns');
 let patternCommand = '';
 let patternArg = '';
@@ -46,7 +46,6 @@ try {
 }
 catch (e) {
     Format.error(e.toString());
-    // console.log(e);
 }
 program.parse(process.argv);
 const options = program.opts();
@@ -69,21 +68,19 @@ function loadModule() {
     else if (options.list) {
         getList();
     }
-    else if (options.listmodels) {
+    else if (options.list_models) {
         getModels();
     }
-    else if (options.changeDefaultModel) {
+    else if (options.default_model) {
+        defaultModel(options.default_model);
     }
-    else if (options.remoteOllamaServer) {
+    else if (options.remote_ollama_server) {
     }
-    /*else if (options.merge) {
-        mergePatterns();
-    }*/
     else if (options.pattern) {
         processPattern(options);
     }
     else {
-        console.log('missing command [--pattern, --setup, --update, --listmodels, --changeDedaultModel, --remoteOllamaServer, --merge]');
+        console.log('missing command [--pattern, --setup, --update, --list_models, --default_model, --remoteOllamaServer, --merge]');
     }
 }
 //# sourceMappingURL=index.js.map

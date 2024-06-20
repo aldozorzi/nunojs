@@ -74,4 +74,4 @@ export function getModels() {
         }
     });
 }
-//# sourceMappingURL=listmodels.js.map
+//# sourceMappingURL=list_models.js.map
