@@ -5,6 +5,10 @@ import fse from 'fs-extra/esm';
 import { simpleGit, SimpleGit, CleanOptions } from 'simple-git';
 
 export async function updatePatterns() {
+
+    const filter = [
+      'show_fabric_options_markmap'
+    ];
     
     const spinner = ora({text:Format.infoColor('Loading patterns...'),color:'blue'}).start();
 
@@ -21,6 +25,13 @@ export async function updatePatterns() {
         await git.checkout();
         await fse.copy(`${dir}/patterns`,'./patterns',{overwrite:true});
         await fs.rm(dir,{recursive:true})
+
+        for (let each in filter)
+          {
+            let dirToRemove = filter[each];
+            await fs.rm(`./patterns/${dirToRemove}`,{recursive:true});
+          }
+
 
         spinner.succeed(Format.successColor('Patterns updated!'));
         

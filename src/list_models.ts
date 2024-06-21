@@ -28,6 +28,6 @@ export async function getModels() {
   const list = await getModelsData();
   for await (const model of list) {
     if (model.id.indexOf('gpt') > -1)
-      console.log(model.id);
+      process.stdout.write(`${model.id}\n`);
   }
 }

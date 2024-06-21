@@ -14,5 +14,5 @@ export async function defaultModel(model:string)
         }
         
     else 
-        Format.error('Model not valid: select a model available in --listmodels');
+        Format.error('Model not valid: select a model available in --list_models');
 }

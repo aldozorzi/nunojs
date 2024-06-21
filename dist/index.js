@@ -26,19 +26,26 @@ program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use"
     .option("-m, --model <model>", "Set the model to use")
     .option("--default_model <model>", "Set the default model to use");
 //.option("--remote_ollama_server <server>", "The URL of the remote ollamaserver to use. ONLY USE THIS if you are using a local ollama server in a non-default location or port");
-const dir = fs.readdirSync('patterns');
+const dir = fs.readdirSync('./patterns');
+const custom_dir = fs.readdirSync('./custom_patterns');
 let patternCommand = '';
 let patternArg = '';
+function addCommand(pattern) {
+    program
+        .command(pattern, { hidden: true })
+        .argument('[text]')
+        .description(`alias for --template '${pattern}'`)
+        .action((arg) => {
+        patternCommand = pattern || '';
+        patternArg = arg || '';
+    });
+}
 try {
     dir.map((pattern) => {
-        program
-            .command(pattern, { hidden: true })
-            .argument('[text]')
-            .description(`alias for --template '${pattern}'`)
-            .action((arg) => {
-            patternCommand = pattern || '';
-            patternArg = arg || '';
-        });
+        addCommand(pattern);
+    });
+    custom_dir.map((pattern) => {
+        addCommand(pattern);
     });
     program
         .command('no_command', { hidden: true, isDefault: true })
@@ -54,7 +61,7 @@ if (patternCommand != '') {
     options.text = patternArg;
 }
 if (Object.keys(options).length == 0) {
-    console.log('no args');
+    Format.warning('No parsed args');
     program.help();
 }
 loadModule();
@@ -80,7 +87,7 @@ function loadModule() {
         processPattern(options);
     }
     else {
-        console.log('missing command [--pattern, --setup, --update, --list_models, --default_model, --remoteOllamaServer, --merge]');
+        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --remoteOllamaServer, --merge]');
     }
 }
 //# sourceMappingURL=index.js.map

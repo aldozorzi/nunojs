@@ -14,6 +14,9 @@ import fse from 'fs-extra/esm';
 import { simpleGit } from 'simple-git';
 export function updatePatterns() {
     return __awaiter(this, void 0, void 0, function* () {
+        const filter = [
+            'show_fabric_options_markmap'
+        ];
         const spinner = ora({ text: Format.infoColor('Loading patterns...'), color: 'blue' }).start();
         const dir = './patterns/_updating_patterns';
         try {
@@ -27,6 +30,10 @@ export function updatePatterns() {
             yield git.checkout();
             yield fse.copy(`${dir}/patterns`, './patterns', { overwrite: true });
             yield fs.rm(dir, { recursive: true });
+            for (let each in filter) {
+                let dirToRemove = filter[each];
+                yield fs.rm(`./patterns/${dirToRemove}`, { recursive: true });
+            }
             spinner.succeed(Format.successColor('Patterns updated!'));
         }
         catch (err) {

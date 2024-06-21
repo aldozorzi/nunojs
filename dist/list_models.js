@@ -62,7 +62,7 @@ export function getModels() {
                 _d = false;
                 const model = _c;
                 if (model.id.indexOf('gpt') > -1)
-                    console.log(model.id);
+                    process.stdout.write(`${model.id}\n`);
             }
         }
         catch (e_2_1) { e_2 = { error: e_2_1 }; }
