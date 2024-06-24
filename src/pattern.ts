@@ -85,6 +85,9 @@ async function loadPattern() {
             messages: msgs,
             model: getModel(),
             stream: options.stream === true && !options.output,
+            frequency_penalty: options.frequency_penalty || 0,
+            top_p : options.top_p || 1,
+            temperature: options.temperature || 1,
         });
         if ('choices' in chatCompletion) {
             if (options.output) {
