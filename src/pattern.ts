@@ -30,7 +30,7 @@ async function loadPipedText() {
     loadPattern();
 }
 
-function getModel() {
+function getModel() :string {
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -41,14 +41,19 @@ function getModel() {
         return 'gemini-1.5-flash';
     if (config.has('anthropicKey') && config.get('anthropicKey') != '')
         return 'claude-3-5-sonnet-20240620';
+    return '';
 }
 
-function getProvider() : string{
+async function getProvider() : Promise<string>{
     const model = getModel();
     if(model.indexOf('gpt')>-1)
         return 'open-ai';
     else if(model.indexOf('gemini')>-1)
         return 'google';
+    else if(model.indexOf('claude')>-1)
+        return 'anthropic';
+    else if(await checkModel(model))
+        return 'ollama';
     return '';
 }
 
@@ -90,7 +95,7 @@ async function loadPattern() {
 
         const pattern = await fs.promises.readFile(patternFile, 'utf8');
         
-        const adapter = new llmAdapter({ provider: getProvider(), apiKey: getApiKey() });
+        const adapter = new llmAdapter({ provider: await getProvider(), apiKey: getApiKey() });
         const chatCompletion = await adapter.create({
             system: pattern,
             user: options.text,

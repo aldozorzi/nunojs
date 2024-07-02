@@ -10,6 +10,7 @@ import { updatePatterns } from "./update.js";
 import { getList } from "./list.js";
 import { getModels } from './list_models.js';
 import { defaultModel } from './default_model.js';
+import { ollamaServer } from './ollama_server.js';
 
 
 const program = new Command();
@@ -31,7 +32,7 @@ program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use"
     .option("--list_models", "List all available models")
     .option("-m, --model <model>", "Set the model to use")
     .option("--default_model <model>", "Set the default model to use")
-    //.option("--ollama_server <server>", "Set The URL of the remote ollamaserver to use.");
+    .option("--ollama_server <server>", "Set The URL of the remote ollamaserver to use.");
 
 const dir = fs.readdirSync('./patterns');
 const custom_dir = fs.readdirSync('./custom_patterns');
@@ -97,13 +98,13 @@ function loadModule() {
     else if (options.default_model) {
         defaultModel(options.default_model);
     }
-    else if (options.remote_ollama_server) {
-
+    else if (options.ollama_server) {
+        ollamaServer(options.ollama_server);
     }
     else if (options.pattern) {
         processPattern(options);
     }
     else {
-        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --remoteOllamaServer, --merge]');
+        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge]');
     }
 }

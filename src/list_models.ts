@@ -4,13 +4,14 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 import { describe } from "node:test";
+import { ollamaServer } from "./ollama_server.js";
 
 
 
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-type Cache = { openAIModels?: string[], googleModels?: string[], anthropicModels?: string[] };
+type Cache = { openAIModels?: string[], googleModels?: string[], anthropicModels?: string[], ollamaModels?: string[] };
 let cache: Cache = {};
 
 async function getOpenAIModelsData(): Promise<string[]> {
@@ -56,10 +57,35 @@ async function getGoogleModelsData(): Promise<string[]> {
   return cache.googleModels;
 }
 
+async function getOllamaModelsData():Promise<string[]>{
+  if (!config.has('ollamaServer') || config.get('ollamaServer') == '') {
+    return [];
+  }
+  if (!cache.ollamaModels) {
+    const response = await fetch(`${config.get('ollamaServer')}/api/tags`);
+    if (!response.ok) {
+      const data = await response.json();
+      const message = `Error ${response.status} - ${data.error.message}`;
+      throw new Error(message);
+    }
+
+    const data = await response.json();
+
+    let result = [];
+    for (let key in data.models) {
+      const model = data.models[key];
+        result.push(model.name);
+    }
+    cache.ollamaModels = result;
+  }
+  return cache.ollamaModels;
+}
+
 async function getModelsData(): Promise<string[]> {
   const openAIdata = await getOpenAIModelsData();
   const googleData = await getGoogleModelsData();
-  return [...openAIdata, ...googleData];
+  const ollamaData = await getOllamaModelsData();
+  return [...openAIdata, ...googleData, ...ollamaData];
 
 }
 

@@ -79,11 +79,35 @@ function getGoogleModelsData() {
         return cache.googleModels;
     });
 }
+function getOllamaModelsData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config.has('ollamaServer') || config.get('ollamaServer') == '') {
+            return [];
+        }
+        if (!cache.ollamaModels) {
+            const response = yield fetch(`${config.get('ollamaServer')}/api/tags`);
+            if (!response.ok) {
+                const data = yield response.json();
+                const message = `Error ${response.status} - ${data.error.message}`;
+                throw new Error(message);
+            }
+            const data = yield response.json();
+            let result = [];
+            for (let key in data.models) {
+                const model = data.models[key];
+                result.push(model.name);
+            }
+            cache.ollamaModels = result;
+        }
+        return cache.ollamaModels;
+    });
+}
 function getModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
         const openAIdata = yield getOpenAIModelsData();
         const googleData = yield getGoogleModelsData();
-        return [...openAIdata, ...googleData];
+        const ollamaData = yield getOllamaModelsData();
+        return [...openAIdata, ...googleData, ...ollamaData];
     });
 }
 export function getModelsList() {

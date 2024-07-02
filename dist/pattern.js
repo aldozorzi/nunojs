@@ -62,14 +62,21 @@ function getModel() {
         return 'gemini-1.5-flash';
     if (config.has('anthropicKey') && config.get('anthropicKey') != '')
         return 'claude-3-5-sonnet-20240620';
+    return '';
 }
 function getProvider() {
-    const model = getModel();
-    if (model.indexOf('gpt') > -1)
-        return 'open-ai';
-    else if (model.indexOf('gemini') > -1)
-        return 'google';
-    return '';
+    return __awaiter(this, void 0, void 0, function* () {
+        const model = getModel();
+        if (model.indexOf('gpt') > -1)
+            return 'open-ai';
+        else if (model.indexOf('gemini') > -1)
+            return 'google';
+        else if (model.indexOf('claude') > -1)
+            return 'anthropic';
+        else if (yield checkModel(model))
+            return 'ollama';
+        return '';
+    });
 }
 function getApiKey() {
     const model = getModel();
@@ -105,7 +112,7 @@ function loadPattern() {
                     options.text = yield fs.promises.readFile(customUserFile, 'utf8');
             }
             const pattern = yield fs.promises.readFile(patternFile, 'utf8');
-            const adapter = new llmAdapter({ provider: getProvider(), apiKey: getApiKey() });
+            const adapter = new llmAdapter({ provider: yield getProvider(), apiKey: getApiKey() });
             const chatCompletion = yield adapter.create({
                 system: pattern,
                 user: options.text,
