@@ -2,6 +2,7 @@ import { OptionValues } from 'commander';
 import fs from 'fs';
 import fse from 'fs-extra/esm';
 import { llmAdapter } from '@ldazrz/llm-adapters'
+import { Config } from '@ldazrz/llm-adapters/types.js'
 
 import Configstore from 'configstore';
 import ora from 'ora';
@@ -44,17 +45,17 @@ function getModel() :string {
     return '';
 }
 
-async function getProvider() : Promise<string>{
+async function getProvider() : Promise<'open-ai' | 'google' | 'ollama'>{
     const model = getModel();
     if(model.indexOf('gpt')>-1)
         return 'open-ai';
     else if(model.indexOf('gemini')>-1)
         return 'google';
-    else if(model.indexOf('claude')>-1)
-        return 'anthropic';
+    /*else if(model.indexOf('claude')>-1)
+        return 'anthropic';*/
     else if(await checkModel(model))
         return 'ollama';
-    return '';
+    return 'open-ai';
 }
 
 function getApiKey() : string{
@@ -95,7 +96,16 @@ async function loadPattern() {
 
         const pattern = await fs.promises.readFile(patternFile, 'utf8');
         
-        const adapter = new llmAdapter({ provider: await getProvider(), apiKey: getApiKey() });
+        const provider = await getProvider();
+        let adapterParams:Config = { provider:provider }
+        if(provider == 'ollama')
+        {
+            adapterParams.serverUrl = config.get('ollamaServer');
+        }else{
+            adapterParams.apiKey = getApiKey();
+        }
+        
+        const adapter = new llmAdapter(adapterParams);
         const chatCompletion = await adapter.create({
             system: pattern,
             user: options.text,
@@ -105,7 +115,6 @@ async function loadPattern() {
             top_p: options.top_p || 1,
             temperature: options.temperature || 1,
         });
-
         if ('content' in chatCompletion) {
             if (options.output) {
                 try {

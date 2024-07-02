@@ -71,11 +71,11 @@ function getProvider() {
             return 'open-ai';
         else if (model.indexOf('gemini') > -1)
             return 'google';
-        else if (model.indexOf('claude') > -1)
-            return 'anthropic';
+        /*else if(model.indexOf('claude')>-1)
+            return 'anthropic';*/
         else if (yield checkModel(model))
             return 'ollama';
-        return '';
+        return 'open-ai';
     });
 }
 function getApiKey() {
@@ -112,7 +112,15 @@ function loadPattern() {
                     options.text = yield fs.promises.readFile(customUserFile, 'utf8');
             }
             const pattern = yield fs.promises.readFile(patternFile, 'utf8');
-            const adapter = new llmAdapter({ provider: yield getProvider(), apiKey: getApiKey() });
+            const provider = yield getProvider();
+            let adapterParams = { provider: provider };
+            if (provider == 'ollama') {
+                adapterParams.serverUrl = config.get('ollamaServer');
+            }
+            else {
+                adapterParams.apiKey = getApiKey();
+            }
+            const adapter = new llmAdapter(adapterParams);
             const chatCompletion = yield adapter.create({
                 system: pattern,
                 user: options.text,
