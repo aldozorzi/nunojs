@@ -20,7 +20,7 @@ export function defaultModel(model) {
             Format.success(`Default model set to ${model}`);
         }
         else
-            Format.error('Model not valid: select a model available in --listmodels');
+            Format.error('Model not valid: select a model available in --list_models');
     });
 }
 //# sourceMappingURL=default_model.js.map

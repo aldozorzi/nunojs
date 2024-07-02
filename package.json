@@ -1,7 +1,7 @@
 {
-  "name": "fabricjs",
+  "name": "nunojs",
   "version": "1.0.0",
-  "description": "Fabric JS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I really wanted to use it, but it didn't work on my Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.",
+  "description": "Nuno JS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I really wanted to use it, but it didn't work on my Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.",
   "exports": "./dist/index.js",
   "type": "module",
   "engines": {
@@ -14,12 +14,14 @@
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "fabricjs": "./dist/index.js"
+    "nunojs": "./dist/index.js",
+    "nuno": "./dist/index.js"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@google/generative-ai": "^0.14.1",
     "@types/configstore": "^6.0.2",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
@@ -28,10 +30,10 @@
     "configstore": "^6.0.0",
     "fs-extra": "^11.2.0",
     "inquirer": "^9.2.23",
+    "log-symbols": "^6.0.0",
     "openai": "^4.52.0",
     "ora": "^8.0.1",
-    "simple-git": "^3.25.0",
-    "log-symbols": "^6.0.0"
+    "simple-git": "^3.25.0"
   },
   "devDependencies": {
     "@types/node": "^20.14.5",

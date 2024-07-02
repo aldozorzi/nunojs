@@ -52,7 +52,6 @@ function loadPipedText() {
     });
 }
 function getModel() {
-    // [TODO] validate model against a list or something like that
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -63,29 +62,43 @@ function loadPattern() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_2, _b, _c;
         var _d, _e;
-        if (!options.text || options.text == "")
-            return Format.error("Input text not set. Use --text or use piped form (\"text\" | fabricjs [...] ) to set input text.");
+        /*if (!options.text || options.text == "")
+            return Format.error("Input text not set. Use --text or use piped form (\"text\" | nunojs [...] ) to set input text.");*/
         const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
         try {
             let patternFile = `./patterns/${options.pattern}/system.md`;
-            const customFile = `./custom_patterns/${options.pattern}/system.md`;
+            let userFile = `./patterns/${options.pattern}/user.md`;
+            const customPatternFile = `./custom_patterns/${options.pattern}/system.md`;
+            const customUserFile = `./custom_patterns/${options.pattern}/user.md`;
             const fileExists = yield fse.pathExists(patternFile);
-            const customFileExists = yield fse.pathExists(customFile);
+            const userFileExists = yield fse.pathExists(userFile);
+            const customFileExists = yield fse.pathExists(customPatternFile);
+            const customUserFileExists = yield fse.pathExists(customUserFile);
             if (!fileExists && !customFileExists)
                 return spinner.fail(Format.errorColor(`Pattern "${options.pattern}" doesn't exists`));
             else if (customFileExists)
-                patternFile = customFile;
+                patternFile = customPatternFile;
+            if ((!options.text || options.text == "")) {
+                if (fileExists && userFileExists)
+                    options.text = yield fs.promises.readFile(userFile, 'utf8');
+                else if (customFileExists && customUserFileExists)
+                    options.text = yield fs.promises.readFile(customUserFile, 'utf8');
+            }
             const pattern = yield fs.promises.readFile(patternFile, 'utf8');
             const openai = new OpenAI({
                 apiKey: config.get('openAiKey'),
             });
+            let msgs = [{ role: 'system', content: pattern }];
+            if (options.text && options.text != "") {
+                msgs.push({ role: 'user', content: options.text });
+            }
             const chatCompletion = yield openai.chat.completions.create({
-                messages: [
-                    { role: 'system', content: pattern },
-                    { role: 'user', content: options.text }
-                ],
+                messages: msgs,
                 model: getModel(),
                 stream: options.stream === true && !options.output,
+                frequency_penalty: options.frequency_penalty || 0,
+                top_p: options.top_p || 1,
+                temperature: options.temperature || 1,
             });
             if ('choices' in chatCompletion) {
                 if (options.output) {
@@ -99,10 +112,12 @@ function loadPattern() {
                     }
                 }
                 else {
+                    spinner.stop();
                     process.stdout.write(chatCompletion.choices[0].message.content || "");
                 }
             }
             else {
+                spinner.stop();
                 try {
                     for (var _f = true, chatCompletion_1 = __asyncValues(chatCompletion), chatCompletion_1_1; chatCompletion_1_1 = yield chatCompletion_1.next(), _a = chatCompletion_1_1.done, !_a; _f = true) {
                         _c = chatCompletion_1_1.value;
@@ -129,9 +144,9 @@ export function processPattern(opt) {
     return __awaiter(this, void 0, void 0, function* () {
         options = opt;
         if (!config.get('openAiKey'))
-            return Format.error('OpenAI key not set. Set your OpenAI key with fabricjs --setup');
+            return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
         if (options.model && !(yield checkModel(options.model)))
-            return Format.error('Model not valid: select a model available in --listmodels');
+            return Format.error('Model not valid: select a model available in --list_models');
         if (!options.text) {
             loadPipedText();
         }

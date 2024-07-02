@@ -17,22 +17,21 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
 import OpenAI from "openai";
 import Configstore from 'configstore';
 import fs from 'fs';
+import fetch from 'node-fetch';
+import { Format } from "./lib/format.js";
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-function getModelsData() {
+function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
+        var _a, e_1, _b, _c;
+        if (!config.has('openAiKey') || config.get('openAiKey') == '') {
+            return [];
+        }
         const openai = new OpenAI({
             apiKey: config.get('openAiKey'),
         });
         const list = yield openai.models.list();
-        return list;
-    });
-}
-export function getModelsList() {
-    return __awaiter(this, void 0, void 0, function* () {
-        var _a, e_1, _b, _c;
         let result = [];
-        const list = yield getModelsData();
         try {
             for (var _d = true, list_1 = __asyncValues(list), list_1_1; list_1_1 = yield list_1.next(), _a = list_1_1.done, !_a; _d = true) {
                 _c = list_1_1.value;
@@ -52,25 +51,58 @@ export function getModelsList() {
         return result;
     });
 }
+function getGoogleModelsData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config.has('googleKey') || config.get('googleKey') == '') {
+            return [];
+        }
+        const response = yield fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
+        if (!response.ok) {
+            const data = yield response.json();
+            const message = `Error ${response.status} - ${data.error.message}`;
+            throw new Error(message);
+        }
+        const data = yield response.json();
+        let result = [];
+        for (let key in data.models) {
+            const model = data.models[key];
+            if (model.name.indexOf('gemini') > -1)
+                result.push(model.name.replace('models/', ''));
+        }
+        return result;
+    });
+}
+function getModelsData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        const openAIdata = yield getOpenAIModelsData();
+        const googleData = yield getGoogleModelsData();
+        return [...openAIdata, ...googleData];
+    });
+}
+export function getModelsList() {
+    return __awaiter(this, void 0, void 0, function* () {
+        try {
+            const list = yield getModelsData();
+            return list;
+        }
+        catch (e) {
+            Format.error(e.toString());
+        }
+    });
+}
 export function getModels() {
     return __awaiter(this, void 0, void 0, function* () {
-        var _a, e_2, _b, _c;
-        const list = yield getModelsData();
         try {
-            for (var _d = true, list_2 = __asyncValues(list), list_2_1; list_2_1 = yield list_2.next(), _a = list_2_1.done, !_a; _d = true) {
-                _c = list_2_1.value;
-                _d = false;
-                const model = _c;
-                if (model.id.indexOf('gpt') > -1)
-                    process.stdout.write(`${model.id}\n`);
+            const list = yield getModelsData();
+            if (list.length == 0) {
+                Format.warning('No models found, please set at least an API key using nunojs --setup');
+            }
+            else {
+                process.stdout.write(list.join('\r\n'));
             }
         }
-        catch (e_2_1) { e_2 = { error: e_2_1 }; }
-        finally {
-            try {
-                if (!_d && !_a && (_b = list_2.return)) yield _b.call(list_2);
-            }
-            finally { if (e_2) throw e_2.error; }
+        catch (e) {
+            Format.error(e.toString());
         }
     });
 }

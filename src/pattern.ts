@@ -31,7 +31,6 @@ async function loadPipedText() {
 }
 
 function getModel() {
-    // [TODO] validate model against a list or something like that
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -42,7 +41,7 @@ function getModel() {
 async function loadPattern() {
 
     /*if (!options.text || options.text == "")
-        return Format.error("Input text not set. Use --text or use piped form (\"text\" | fabricjs [...] ) to set input text.");*/
+        return Format.error("Input text not set. Use --text or use piped form (\"text\" | nunojs [...] ) to set input text.");*/
     const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
     try {
         let patternFile = `./patterns/${options.pattern}/system.md`;
@@ -119,7 +118,7 @@ async function loadPattern() {
 export async function processPattern(opt: OptionValues) {
     options = opt;
     if (!config.get('openAiKey'))
-        return Format.error('OpenAI key not set. Set your OpenAI key with fabricjs --setup');
+        return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
     if (options.model && !await checkModel(options.model))
         return Format.error('Model not valid: select a model available in --list_models');
     if (!options.text) {

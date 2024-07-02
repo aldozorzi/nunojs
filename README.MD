@@ -1,7 +1,7 @@
 
-# Fabric JS
+# NunoJS
 
-Fabric JS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.
+NunoJS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.
 
 And then, who knows? Perhaps a web based version?
 
@@ -9,41 +9,53 @@ And then, who knows? Perhaps a web based version?
 
 ```bash
 
-git  clone  https://github.com/aldozorzi/fabricjs
+git  clone  https://github.com/aldozorzi/nunojs
 
-npm  install -g fabricjs
+npm  install -g nunojs
+
+npm link
 
 ```
 
 ## Usage
 
-To start using FabricJS, simply launch
+To start using NunoJS, simply launch
 
-` fabricjs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.'`
+` nunojs --setup`
+
+and complete api key setup.
+
+The you can launch something like
+
+` nunojs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.'`
 
 or
 
-` fabricjs -p 'pattern_name' -t 'Science is going to be revolutionized by AI assistants.'`
+` nunojs -p 'pattern_name' -t 'Science is going to be revolutionized by AI assistants.'`
 
 All patterns are available as sub-command too, so
 
-` fabricjs pattern_name 'Science is going to be revolutionized by AI assistants.' `
+` nunojs pattern_name 'Science is going to be revolutionized by AI assistants.' `
 
 is equal to
 
-` fabricjs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.' `
+` nunojs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.' `
 
-FabricJS accept piped text as input (and returns "pipable" text as output), so you can use something like
+Available patterns are listed with
 
-` 'Science is going to be revolutionized by AI assistants.' | fabricjs pattern_name `
+` nunojs --list `
+
+NunoJS accept piped text as input (and returns "pipable" text as output), so you can use something like
+
+` 'Science is going to be revolutionized by AI assistants.' | nunojs pattern_name `
 
 To print help:
 
-` fabricjs --help`
+` nunojs --help`
 
 or
 
-` fabricjs `
+` nunojs `
 
 ## Custom Patterns
 

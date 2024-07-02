@@ -16,8 +16,8 @@ export async function updatePatterns() {
     try {
         await fse.ensureDir(dir);
 
-        // [TODO] change url to https://github.com/aldozorzi/fabricjs - using https://github.com/danielmiessler/fabric because public
-        // const repoPath = 'https://github.com/aldozorzi/fabricjs';
+        // [TODO] change url to https://github.com/aldozorzi/nunojs - using https://github.com/danielmiessler/fabric because public
+        // const repoPath = 'https://github.com/aldozorzi/nunojs';
         const repoPath = 'https://github.com/danielmiessler/fabric';
         const git: SimpleGit = simpleGit();
         await git.clone(repoPath,dir,['-n','--depth=1','--filter=tree:0']);
