@@ -35,7 +35,12 @@ function getModel() {
         return options.model;
     else if (config.get('defaultModel'))
         return config.get('defaultModel');
-    return 'gpt-3.5-turbo';
+    if(config.has('openAiKey') && config.get('openAiKey') != '')
+        return 'gpt-3.5-turbo';
+    if(config.has('googleKey') && config.get('googleKey') != '')
+        return 'gemini-1.5-flash-latest';
+    if(config.has('anthropicKey') && config.get('anthropicKey') != '')
+        return 'claude-3-5-sonnet-20240620';
 }
 
 async function loadPattern() {

@@ -19,11 +19,21 @@ npm link
 
 To start using NunoJS, simply launch
 
-` nunojs --setup`
+` nunojs --setup `
 
 and complete api key setup.
 
-The you can launch something like
+Then you would like to lauch something like 
+
+` nunojs --default_model gpt-3.5-turbo `
+
+to set a default model for your calls. Use 
+
+` nunojs --list_models `
+
+to get a list of all available models.
+
+Then you can launch something like
 
 ` nunojs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.'`
 
@@ -42,6 +52,8 @@ is equal to
 Available patterns are listed with
 
 ` nunojs --list `
+
+and you can add your own patterns to the folder `custom_patterns`. Look at read file in the folder to get an idea, or read next chapter.
 
 NunoJS accept piped text as input (and returns "pipable" text as output), so you can use something like
 
