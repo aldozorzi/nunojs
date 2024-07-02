@@ -14,7 +14,7 @@ program
     .description("A JS framework for augmenting humans AI.");
 program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use")
     .option("-t, --text <text>", "Text to analyze")
-    .option("-o, --output <text>", "Save the result to a file")
+    .option("-o, --output <filepath/to/filename.md>", "Save the result to a file")
     .option("-s, --stream", "Use this option if you want to see the results in realtime. NOTE: you can't pipe the output into another command, or use with --output")
     .option("-l, --list", "List available patterns")
     .option("--temp <temperature>", "Set the temperature for the model. Default is 0")
@@ -25,7 +25,7 @@ program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use"
     .option("--list_models", "List all available models")
     .option("-m, --model <model>", "Set the model to use")
     .option("--default_model <model>", "Set the default model to use");
-//.option("--remote_ollama_server <server>", "The URL of the remote ollamaserver to use. ONLY USE THIS if you are using a local ollama server in a non-default location or port");
+//.option("--ollama_server <server>", "Set The URL of the remote ollamaserver to use.");
 const dir = fs.readdirSync('./patterns');
 const custom_dir = fs.readdirSync('./custom_patterns');
 let patternCommand = '';

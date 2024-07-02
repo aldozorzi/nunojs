@@ -11,7 +11,7 @@ import { getModelsList } from '../list_models.js';
 export function checkModel(model) {
     return __awaiter(this, void 0, void 0, function* () {
         const modelsList = yield getModelsList();
-        return modelsList.includes(model);
+        return modelsList && modelsList.includes(model);
     });
 }
 //# sourceMappingURL=checkModel.js.map

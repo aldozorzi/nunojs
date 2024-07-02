@@ -16,11 +16,11 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
 };
 import fs from 'fs';
 import fse from 'fs-extra/esm';
-import { Format } from './lib/format.js';
-import OpenAI from 'openai';
+import { llmAdapter } from '@ldazrz/llm-adapters';
 import Configstore from 'configstore';
 import ora from 'ora';
 import { checkModel } from './lib/checkModel.js';
+import { Format } from './lib/format.js';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
 var options;
@@ -59,14 +59,29 @@ function getModel() {
     if (config.has('openAiKey') && config.get('openAiKey') != '')
         return 'gpt-3.5-turbo';
     if (config.has('googleKey') && config.get('googleKey') != '')
-        return 'gemini-1.5-flash-latest';
+        return 'gemini-1.5-flash';
     if (config.has('anthropicKey') && config.get('anthropicKey') != '')
         return 'claude-3-5-sonnet-20240620';
+}
+function getProvider() {
+    const model = getModel();
+    if (model.indexOf('gpt') > -1)
+        return 'open-ai';
+    else if (model.indexOf('gemini') > -1)
+        return 'google';
+    return '';
+}
+function getApiKey() {
+    const model = getModel();
+    if (model.indexOf('gpt') > -1)
+        return config.get('openAiKey');
+    else if (model.indexOf('gemini') > -1)
+        return config.get('googleKey');
+    return '';
 }
 function loadPattern() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_2, _b, _c;
-        var _d, _e;
         /*if (!options.text || options.text == "")
             return Format.error("Input text not set. Use --text or use piped form (\"text\" | nunojs [...] ) to set input text.");*/
         const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
@@ -90,26 +105,21 @@ function loadPattern() {
                     options.text = yield fs.promises.readFile(customUserFile, 'utf8');
             }
             const pattern = yield fs.promises.readFile(patternFile, 'utf8');
-            const openai = new OpenAI({
-                apiKey: config.get('openAiKey'),
-            });
-            let msgs = [{ role: 'system', content: pattern }];
-            if (options.text && options.text != "") {
-                msgs.push({ role: 'user', content: options.text });
-            }
-            const chatCompletion = yield openai.chat.completions.create({
-                messages: msgs,
+            const adapter = new llmAdapter({ provider: getProvider(), apiKey: getApiKey() });
+            const chatCompletion = yield adapter.create({
+                system: pattern,
+                user: options.text,
                 model: getModel(),
                 stream: options.stream === true && !options.output,
                 frequency_penalty: options.frequency_penalty || 0,
                 top_p: options.top_p || 1,
                 temperature: options.temperature || 1,
             });
-            if ('choices' in chatCompletion) {
+            if ('content' in chatCompletion) {
                 if (options.output) {
                     try {
                         yield fse.ensureFile(options.output);
-                        const result = yield fs.promises.writeFile(options.output, chatCompletion.choices[0].message.content || "");
+                        const result = yield fs.promises.writeFile(options.output, chatCompletion.content || "");
                         return spinner.succeed(Format.successColor('File saved!'));
                     }
                     catch (e) {
@@ -118,23 +128,23 @@ function loadPattern() {
                 }
                 else {
                     spinner.stop();
-                    process.stdout.write(chatCompletion.choices[0].message.content || "");
+                    process.stdout.write(chatCompletion.content || "");
                 }
             }
             else {
                 spinner.stop();
                 try {
-                    for (var _f = true, chatCompletion_1 = __asyncValues(chatCompletion), chatCompletion_1_1; chatCompletion_1_1 = yield chatCompletion_1.next(), _a = chatCompletion_1_1.done, !_a; _f = true) {
+                    for (var _d = true, chatCompletion_1 = __asyncValues(chatCompletion), chatCompletion_1_1; chatCompletion_1_1 = yield chatCompletion_1.next(), _a = chatCompletion_1_1.done, !_a; _d = true) {
                         _c = chatCompletion_1_1.value;
-                        _f = false;
+                        _d = false;
                         const chunk = _c;
-                        process.stdout.write(((_e = (_d = chunk.choices[0]) === null || _d === void 0 ? void 0 : _d.delta) === null || _e === void 0 ? void 0 : _e.content) || '');
+                        process.stdout.write(chunk.content || '');
                     }
                 }
                 catch (e_2_1) { e_2 = { error: e_2_1 }; }
                 finally {
                     try {
-                        if (!_f && !_a && (_b = chatCompletion_1.return)) yield _b.call(chatCompletion_1);
+                        if (!_d && !_a && (_b = chatCompletion_1.return)) yield _b.call(chatCompletion_1);
                     }
                     finally { if (e_2) throw e_2.error; }
                 }

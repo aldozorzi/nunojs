@@ -1,17 +1,17 @@
 import { OptionValues } from 'commander';
 import fs from 'fs';
 import fse from 'fs-extra/esm';
-import { Format } from './lib/format.js';
-import OpenAI from 'openai';
+import { llmAdapter } from '@ldazrz/llm-adapters'
 
 import Configstore from 'configstore';
 import ora from 'ora';
 import { checkModel } from './lib/checkModel.js';
+import { Format } from './lib/format.js';
 
 interface Message {
     role: 'system' | 'user' | 'assistant';
     content: string;
-  }
+}
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
@@ -35,12 +35,30 @@ function getModel() {
         return options.model;
     else if (config.get('defaultModel'))
         return config.get('defaultModel');
-    if(config.has('openAiKey') && config.get('openAiKey') != '')
+    if (config.has('openAiKey') && config.get('openAiKey') != '')
         return 'gpt-3.5-turbo';
-    if(config.has('googleKey') && config.get('googleKey') != '')
-        return 'gemini-1.5-flash-latest';
-    if(config.has('anthropicKey') && config.get('anthropicKey') != '')
+    if (config.has('googleKey') && config.get('googleKey') != '')
+        return 'gemini-1.5-flash';
+    if (config.has('anthropicKey') && config.get('anthropicKey') != '')
         return 'claude-3-5-sonnet-20240620';
+}
+
+function getProvider() : string{
+    const model = getModel();
+    if(model.indexOf('gpt')>-1)
+        return 'open-ai';
+    else if(model.indexOf('gemini')>-1)
+        return 'google';
+    return '';
+}
+
+function getApiKey() : string{
+    const model = getModel();
+    if(model.indexOf('gpt')>-1)
+        return config.get('openAiKey');
+    else if(model.indexOf('gemini')>-1)
+        return config.get('googleKey');
+    return '';
 }
 
 async function loadPattern() {
@@ -63,7 +81,6 @@ async function loadPattern() {
             return spinner.fail(Format.errorColor(`Pattern "${options.pattern}" doesn't exists`));
         else if (customFileExists)
             patternFile = customPatternFile;
-
         if ((!options.text || options.text == "")) {
             if (fileExists && userFileExists)
                 options.text = await fs.promises.readFile(userFile, 'utf8');
@@ -72,49 +89,38 @@ async function loadPattern() {
         }
 
         const pattern = await fs.promises.readFile(patternFile, 'utf8');
-        const openai = new OpenAI({
-            apiKey: config.get('openAiKey'),
-        });
         
-        let msgs: Message[] = [{ role: 'system', content: pattern }];
-
-        if(options.text && options.text != "")
-            {
-                msgs.push({ role: 'user', content: options.text })
-            }
-        
-        
-
-        const chatCompletion = await openai.chat.completions.create({
-            messages: msgs,
+        const adapter = new llmAdapter({ provider: getProvider(), apiKey: getApiKey() });
+        const chatCompletion = await adapter.create({
+            system: pattern,
+            user: options.text,
             model: getModel(),
             stream: options.stream === true && !options.output,
             frequency_penalty: options.frequency_penalty || 0,
-            top_p : options.top_p || 1,
+            top_p: options.top_p || 1,
             temperature: options.temperature || 1,
         });
-        if ('choices' in chatCompletion) {
+
+        if ('content' in chatCompletion) {
             if (options.output) {
                 try {
                     await fse.ensureFile(options.output);
-                    const result = await fs.promises.writeFile(options.output, chatCompletion.choices[0].message.content || "");
+                    const result = await fs.promises.writeFile(options.output, chatCompletion.content || "");
                     return spinner.succeed(Format.successColor('File saved!'));
                 } catch (e: any) {
                     spinner.fail(Format.errorColor(e.toString()));
                 }
-
             } else {
                 spinner.stop();
-                process.stdout.write(chatCompletion.choices[0].message.content || "");
+                process.stdout.write(chatCompletion.content || "");
             }
-
-        }
-        else {
+        }else{
             spinner.stop();
             for await (const chunk of chatCompletion) {
-                process.stdout.write(chunk.choices[0]?.delta?.content || '');
+                process.stdout.write(chunk.content || '');
             }
         }
+
     } catch (e: any) {
         spinner.fail(Format.errorColor(e.toString()));
     }

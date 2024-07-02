@@ -22,6 +22,7 @@
   "license": "ISC",
   "dependencies": {
     "@google/generative-ai": "^0.14.1",
+    "@ldazrz/llm-adapters": "^0.0.1",
     "@types/configstore": "^6.0.2",
     "@types/fs-extra": "^11.0.4",
     "@types/inquirer": "^9.0.7",
