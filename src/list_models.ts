@@ -18,17 +18,23 @@ async function getOpenAIModelsData(): Promise<string[]> {
   if (!config.has('openAiKey') || config.get('openAiKey') == '') {
     return [];
   }
+
   if (!cache.openAIModels) {
-    const openai = new OpenAI({
-      apiKey: config.get('openAiKey'),
-    });
-    const list = await openai.models.list();
-    let result = [];
-    for await (const model of list) {
-      if (model.id.indexOf('gpt') > -1)
-        result.push(model.id);
+    try {
+      const openai = new OpenAI({
+        apiKey: config.get('openAiKey'),
+      });
+      const list = await openai.models.list();
+      let result = [];
+      for await (const model of list) {
+        if (model.id.indexOf('gpt') > -1)
+          result.push(model.id);
+      }
+      cache.openAIModels = result;
+    } catch (e: any) {
+      Format.warning('Retrieving models from OpenAI failed');
+      cache.openAIModels = [];
     }
-    cache.openAIModels = result;
   }
   return cache.openAIModels;
 }
@@ -38,45 +44,56 @@ async function getGoogleModelsData(): Promise<string[]> {
     return [];
   }
   if (!cache.googleModels) {
-    const response = await fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
-    if (!response.ok) {
-      const data = await response.json();
-      const message = `Error ${response.status} - ${data.error.message}`;
-      throw new Error(message);
-    }
+    try {
+      const response = await fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
+      if (!response.ok) {
+        const data = await response.json();
+        const message = `Error ${response.status} - ${data.error.message}`;
+        throw new Error(message);
+      }
 
-    const data = await response.json();
-    let result = [];
-    for (let key in data.models) {
-      const model = data.models[key];
-      if (model.name.indexOf('gemini') > -1)
-        result.push(model.name.replace('models/', ''));
+      const data = await response.json();
+      let result = [];
+      for (let key in data.models) {
+        const model = data.models[key];
+        if (model.name.indexOf('gemini') > -1)
+          result.push(model.name.replace('models/', ''));
+      }
+      cache.googleModels = result;
+    } catch (e: any) {
+      Format.warning('Retrieving models from Google failed');
+      cache.googleModels = [];
     }
-    cache.googleModels = result;
   }
   return cache.googleModels;
 }
 
-async function getOllamaModelsData():Promise<string[]>{
+async function getOllamaModelsData(): Promise<string[]> {
   if (!config.has('ollamaServer') || config.get('ollamaServer') == '') {
     return [];
   }
+
   if (!cache.ollamaModels) {
-    const response = await fetch(`${config.get('ollamaServer')}/api/tags`);
-    if (!response.ok) {
+    try {
+      const response = await fetch(`${config.get('ollamaServer')}/api/tags`);
+      if (!response.ok) {
+        const data = await response.json();
+        const message = `Error ${response.status} - ${data.error.message}`;
+        throw new Error(message);
+      }
+
       const data = await response.json();
-      const message = `Error ${response.status} - ${data.error.message}`;
-      throw new Error(message);
-    }
 
-    const data = await response.json();
-
-    let result = [];
-    for (let key in data.models) {
-      const model = data.models[key];
+      let result = [];
+      for (let key in data.models) {
+        const model = data.models[key];
         result.push(model.name);
+      }
+      cache.ollamaModels = result;
+    } catch (e: any) {
+      Format.warning('Retrieving models from Ollama failed');
+      cache.ollamaModels = [];
     }
-    cache.ollamaModels = result;
   }
   return cache.ollamaModels;
 }
