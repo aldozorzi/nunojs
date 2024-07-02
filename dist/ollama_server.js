@@ -12,12 +12,19 @@ import Configstore from 'configstore';
 import { Format } from './lib/format.js';
 export function ollamaServer(server) {
     return __awaiter(this, void 0, void 0, function* () {
+        if (server === true)
+            server = '';
         const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
         const config = new Configstore(packageJson.name);
         try {
-            server = server.replace(/\/$/, "");
-            config.set('ollamaServer', server);
-            Format.success(`Ollama server model set to ${server}`);
+            if (server != '') {
+                server = server.replace(/\/$/, "");
+                config.set('ollamaServer', server);
+            }
+            else {
+                config.delete('ollamaServer');
+            }
+            Format.success(server == '' ? 'Ollama server cleared' : `Ollama server model set to ${server}`);
         }
         catch (e) {
             Format.error(e.toString());
