@@ -3,8 +3,6 @@
 
 NunoJS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. So i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop.
 
-And then, who knows? Perhaps a web based version?
-
 ## Installation
 
 ```bash
