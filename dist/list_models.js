@@ -21,34 +21,38 @@ import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
+let cache = {};
 function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_1, _b, _c;
         if (!config.has('openAiKey') || config.get('openAiKey') == '') {
             return [];
         }
-        const openai = new OpenAI({
-            apiKey: config.get('openAiKey'),
-        });
-        const list = yield openai.models.list();
-        let result = [];
-        try {
-            for (var _d = true, list_1 = __asyncValues(list), list_1_1; list_1_1 = yield list_1.next(), _a = list_1_1.done, !_a; _d = true) {
-                _c = list_1_1.value;
-                _d = false;
-                const model = _c;
-                if (model.id.indexOf('gpt') > -1)
-                    result.push(model.id);
-            }
-        }
-        catch (e_1_1) { e_1 = { error: e_1_1 }; }
-        finally {
+        if (!cache.openAIModels) {
+            const openai = new OpenAI({
+                apiKey: config.get('openAiKey'),
+            });
+            const list = yield openai.models.list();
+            let result = [];
             try {
-                if (!_d && !_a && (_b = list_1.return)) yield _b.call(list_1);
+                for (var _d = true, list_1 = __asyncValues(list), list_1_1; list_1_1 = yield list_1.next(), _a = list_1_1.done, !_a; _d = true) {
+                    _c = list_1_1.value;
+                    _d = false;
+                    const model = _c;
+                    if (model.id.indexOf('gpt') > -1)
+                        result.push(model.id);
+                }
             }
-            finally { if (e_1) throw e_1.error; }
+            catch (e_1_1) { e_1 = { error: e_1_1 }; }
+            finally {
+                try {
+                    if (!_d && !_a && (_b = list_1.return)) yield _b.call(list_1);
+                }
+                finally { if (e_1) throw e_1.error; }
+            }
+            cache.openAIModels = result;
         }
-        return result;
+        return cache.openAIModels;
     });
 }
 function getGoogleModelsData() {
@@ -56,20 +60,23 @@ function getGoogleModelsData() {
         if (!config.has('googleKey') || config.get('googleKey') == '') {
             return [];
         }
-        const response = yield fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
-        if (!response.ok) {
+        if (!cache.googleModels) {
+            const response = yield fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
+            if (!response.ok) {
+                const data = yield response.json();
+                const message = `Error ${response.status} - ${data.error.message}`;
+                throw new Error(message);
+            }
             const data = yield response.json();
-            const message = `Error ${response.status} - ${data.error.message}`;
-            throw new Error(message);
+            let result = [];
+            for (let key in data.models) {
+                const model = data.models[key];
+                if (model.name.indexOf('gemini') > -1)
+                    result.push(model.name.replace('models/', ''));
+            }
+            cache.googleModels = result;
         }
-        const data = yield response.json();
-        let result = [];
-        for (let key in data.models) {
-            const model = data.models[key];
-            if (model.name.indexOf('gemini') > -1)
-                result.push(model.name.replace('models/', ''));
-        }
-        return result;
+        return cache.googleModels;
     });
 }
 function getModelsData() {
