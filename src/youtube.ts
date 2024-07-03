@@ -41,7 +41,7 @@ program
     .version('1.0.0')
     .description('A simple tool to retrieve YOuTube transcriptions.');
 
-program.option('-l, --language <language>', 'Set the desired transcription language. If omitted, script tries "en" and if not found it uses the first available trascript.', 'en')
+program.option('-l, --language <language>', 'Set the desired transcription language. If omitted, script tries "en" and if not found it uses the first available transcript.', 'en')
 program.argument('<video_url>', 'video url')
     .action((url) => {
         video_url = url
