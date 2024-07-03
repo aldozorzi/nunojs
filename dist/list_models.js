@@ -15,6 +15,7 @@ var __asyncValues = (this && this.__asyncValues) || function (o) {
     function settle(resolve, reject, d, v) { Promise.resolve(v).then(function(v) { resolve({ value: v, done: d }); }, reject); }
 };
 import OpenAI from "openai";
+import MistralClient from '@mistralai/mistralai';
 import Configstore from 'configstore';
 import fs from 'fs';
 import fetch from 'node-fetch';
@@ -30,6 +31,32 @@ function writeWarning(text) {
     if (!showWarning)
         return;
     Format.warning('Retrieving models from OpenAI failed');
+}
+function getMistralModelsData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config.has('mistralKey') || config.get('mistralKey') == '') {
+            return [];
+        }
+        if (!(yield cache.get('mistralModels'))) {
+            try {
+                const client = new MistralClient(config.get('mistralKey'));
+                const list = yield client.listModels();
+                //console.log(list.data);
+                let result = [];
+                for (let key in list.data) {
+                    const model = list.data[key];
+                    //console.log(model)
+                    result.push(model.id);
+                }
+                yield cache.set('mistralModels', result);
+            }
+            catch (e) {
+                writeWarning('Retrieving models from OpenAI failed');
+                return [];
+            }
+        }
+        return yield cache.get('mistralModels');
+    });
 }
 function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -134,7 +161,8 @@ function getModelsData() {
         const openAIdata = yield getOpenAIModelsData();
         const googleData = yield getGoogleModelsData();
         const ollamaData = yield getOllamaModelsData();
-        return [...openAIdata, ...googleData, ...ollamaData];
+        const mistralData = yield getMistralModelsData();
+        return [...openAIdata, ...googleData, ...ollamaData, ...mistralData];
     });
 }
 export function getModelsList() {
@@ -164,6 +192,34 @@ export function getModels() {
         catch (e) {
             Format.error(e.toString());
         }
+    });
+}
+export function checkModel(model) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const modelsList = yield getModelsList();
+        return modelsList && modelsList.includes(model);
+    });
+}
+export function getProvider(model) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const openAiData = yield getOpenAIModelsData();
+        const googleAiData = yield getGoogleModelsData();
+        const ollamaData = yield getOllamaModelsData();
+        const mistralData = yield getMistralModelsData();
+        if (openAiData.indexOf(model) > -1) {
+            return 'open-ai';
+        }
+        else if (googleAiData.indexOf(model) > -1) {
+            return 'google';
+        }
+        else if (ollamaData.indexOf(model) > -1) {
+            return 'ollama';
+        }
+        else if (mistralData.indexOf(model) > -1) {
+            return 'mistral';
+        }
+        //console.log('model is there:',(model in await getMistralModelsData()))
+        return 'open-ai';
     });
 }
 //# sourceMappingURL=list_models.js.map

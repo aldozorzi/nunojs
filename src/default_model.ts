@@ -1,6 +1,6 @@
 import fs from 'fs';
 import Configstore from 'configstore';
-import { checkModel } from './lib/checkModel.js';
+import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 
 export async function defaultModel(model:string)

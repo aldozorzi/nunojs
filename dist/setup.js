@@ -34,6 +34,11 @@ export function initSetup() {
             },
             {
                 type: 'input',
+                name: 'mistralKey',
+                message: `Paste your Mistral key${config.has('mistralKey') ? ' (blank to keep previous value)' : ''}: `,
+            },
+            {
+                type: 'input',
                 name: 'YTKey',
                 message: `Paste your YouTube key${config.has('YTKey') ? ' (blank to keep previous value)' : ''}: `,
             },

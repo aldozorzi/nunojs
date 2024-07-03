@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import fs from 'fs';
 import Configstore from 'configstore';
-import { checkModel } from './lib/checkModel.js';
+import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 export function defaultModel(model) {
     return __awaiter(this, void 0, void 0, function* () {

@@ -6,8 +6,9 @@ import { Config } from '@ldazrz/llm-adapters/types.js'
 
 import Configstore from 'configstore';
 import ora from 'ora';
-import { checkModel } from './lib/checkModel.js';
+import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
+import { getProvider } from './list_models.js';
 
 interface Message {
     role: 'system' | 'user' | 'assistant';
@@ -38,39 +39,27 @@ function getModel() :string {
         return config.get('defaultModel');
     if (config.has('openAiKey') && config.get('openAiKey') != '')
         return 'gpt-3.5-turbo';
-    if (config.has('googleKey') && config.get('googleKey') != '')
+    else if (config.has('googleKey') && config.get('googleKey') != '')
         return 'gemini-1.5-flash';
-    if (config.has('anthropicKey') && config.get('anthropicKey') != '')
+    else if (config.has('anthropicKey') && config.get('anthropicKey') != '')
         return 'claude-3-5-sonnet-20240620';
+    else if (config.has('mistralKey') && config.get('mistralKey') != '')
+        return 'mistral-tiny';
     return '';
 }
 
-async function getProvider() : Promise<'open-ai' | 'google' | 'ollama'>{
-    const model = getModel();
-    if(model.indexOf('gpt')>-1)
-        return 'open-ai';
-    else if(model.indexOf('gemini')>-1)
-        return 'google';
-    /*else if(model.indexOf('claude')>-1)
-        return 'anthropic';*/
-    else if(await checkModel(model))
-        return 'ollama';
-    return 'open-ai';
-}
-
-function getApiKey() : string{
-    const model = getModel();
-    if(model.indexOf('gpt')>-1)
+async function getApiKey() : Promise<string>{
+    const provider = await getProvider(getModel());
+    if(provider == 'open-ai')
         return config.get('openAiKey');
-    else if(model.indexOf('gemini')>-1)
+    else if(provider == 'google')
         return config.get('googleKey');
+    else if(provider == 'mistral')
+        return config.get('mistralKey');
     return '';
 }
 
 async function loadPattern() {
-
-    /*if (!options.text || options.text == "")
-        return Format.error("Input text not set. Use --text or use piped form (\"text\" | nunojs [...] ) to set input text.");*/
     const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
     try {
         let patternFile = `./patterns/${options.pattern}/system.md`;
@@ -96,15 +85,15 @@ async function loadPattern() {
 
         const pattern = await fs.promises.readFile(patternFile, 'utf8');
         
-        const provider = await getProvider();
+        const provider = await getProvider(getModel());
         let adapterParams:Config = { provider:provider }
         if(provider == 'ollama')
         {
             adapterParams.serverUrl = config.get('ollamaServer');
         }else{
-            adapterParams.apiKey = getApiKey();
+            adapterParams.apiKey = await getApiKey();
         }
-        
+        console.log(adapterParams);
         const adapter = new llmAdapter(adapterParams);
         const chatCompletion = await adapter.create({
             system: pattern,

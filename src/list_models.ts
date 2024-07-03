@@ -1,12 +1,10 @@
 import OpenAI from "openai";
+import MistralClient from '@mistralai/mistralai';
 import Configstore from 'configstore';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 import { Cache } from 'file-system-cache';
-
-
-
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
@@ -15,9 +13,35 @@ const cache = new Cache({
   ttl: 3600
 });
 
-function writeWarning(text:string){
-  if(!showWarning) return;
+function writeWarning(text: string) {
+  if (!showWarning) return;
   Format.warning('Retrieving models from OpenAI failed');
+}
+
+async function getMistralModelsData(): Promise<string[]> {
+  if (!config.has('mistralKey') || config.get('mistralKey') == '') {
+    return [];
+  }
+
+  if (!await cache.get('mistralModels')) {
+    try {
+
+      const client = new MistralClient(config.get('mistralKey'));
+      const list = await client.listModels();
+      //console.log(list.data);
+      let result = [];
+      for (let key in list.data) {
+        const model = list.data[key];
+        //console.log(model)
+        result.push(model.id);
+      }
+      await cache.set('mistralModels', result);
+    } catch (e: any) {
+      writeWarning('Retrieving models from OpenAI failed');
+      return [];
+    }
+  }
+  return await cache.get('mistralModels');
 }
 
 async function getOpenAIModelsData(): Promise<string[]> {
@@ -35,7 +59,7 @@ async function getOpenAIModelsData(): Promise<string[]> {
         if (model.id.indexOf('gpt') > -1)
           result.push(model.id);
       }
-      await cache.set('openAIModels',result);
+      await cache.set('openAIModels', result);
     } catch (e: any) {
       writeWarning('Retrieving models from OpenAI failed');
       return [];
@@ -64,7 +88,7 @@ async function getGoogleModelsData(): Promise<string[]> {
         if (model.name.indexOf('gemini') > -1)
           result.push(model.name.replace('models/', ''));
       }
-      await cache.set('googleModels',result);
+      await cache.set('googleModels', result);
     } catch (e: any) {
       writeWarning('Retrieving models from Google failed');
       return [];
@@ -94,7 +118,7 @@ async function getOllamaModelsData(): Promise<string[]> {
         const model = data.models[key];
         result.push(model.name);
       }
-      await cache.set('ollamaModels',result);
+      await cache.set('ollamaModels', result);
     } catch (e: any) {
       writeWarning('Retrieving models from Ollama failed');
       return [];
@@ -107,7 +131,8 @@ async function getModelsData(): Promise<string[]> {
   const openAIdata = await getOpenAIModelsData();
   const googleData = await getGoogleModelsData();
   const ollamaData = await getOllamaModelsData();
-  return [...openAIdata, ...googleData, ...ollamaData];
+  const mistralData = await getMistralModelsData();
+  return [...openAIdata, ...googleData, ...ollamaData, ...mistralData];
 
 }
 
@@ -137,4 +162,32 @@ export async function getModels() {
   catch (e: any) {
     Format.error(e.toString());
   }
+}
+
+export async function checkModel(model: string) {
+  const modelsList = await getModelsList();
+  return modelsList && modelsList.includes(model);
+}
+
+export async function getProvider(model: string): Promise<'open-ai' | 'google' | 'ollama' | 'anthropic' | 'mistral'> {
+  
+  const openAiData = await getOpenAIModelsData();
+  const googleAiData = await getGoogleModelsData();
+  const ollamaData = await getOllamaModelsData();
+  const mistralData = await getMistralModelsData();
+  
+  if (openAiData.indexOf(model)>-1) {
+    return 'open-ai';
+  }
+  else if (googleAiData.indexOf(model)>-1) {
+    return 'google';
+  }
+  else if (ollamaData.indexOf(model)>-1) {
+    return 'ollama';
+  }
+  else if (mistralData.indexOf(model)>-1) {
+    return 'mistral';
+  }
+  //console.log('model is there:',(model in await getMistralModelsData()))
+  return 'open-ai';
 }

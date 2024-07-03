@@ -88,7 +88,7 @@ function loadModule() {
         ollamaServer(options.ollama_server);
     }
     else if (options.view_config) {
-        viewConfig(options.view_config);
+        viewConfig();
     }
     else if (options.pattern) {
         processPattern(options);
