@@ -41,7 +41,7 @@ export function getYTTranscript(video_id_1) {
     });
 }
 // getYTTranscript('6ktrqFoy-e4');
-const program = new Command();
+const program = new Command('yt');
 let video_url;
 program
     .version('1.0.0')

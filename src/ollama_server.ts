@@ -1,6 +1,5 @@
 import fs from 'fs';
 import Configstore from 'configstore';
-import { checkModel } from './lib/checkModel.js';
 import { Format } from './lib/format.js';
 
 export async function ollamaServer(server: string | true) {

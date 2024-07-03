@@ -34,7 +34,7 @@ export async function getYTTranscript(video_id: string, lang: string = 'en') {
 }
 
 // getYTTranscript('6ktrqFoy-e4');
-const program = new Command();
+const program = new Command('yt');
 let video_url: string;
 
 program

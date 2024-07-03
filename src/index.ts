@@ -11,9 +11,10 @@ import { getList } from './list.js';
 import { getModels } from './list_models.js';
 import { defaultModel } from './default_model.js';
 import { ollamaServer } from './ollama_server.js';
+import { viewConfig } from './view_config.js';
 
 
-const program = new Command();
+const program = new Command('nunojs');
 
 program
     .version('1.0.0')
@@ -43,7 +44,7 @@ let patternArg:string = '';
 
 function addCommand(pattern : string){
     program
-        .command(pattern,{hidden:true})
+        .command(pattern,{hidden:false})
         .argument('[text]')
         .description(`alias for --template '${pattern}'`)
         .action((arg)=>{
@@ -101,10 +102,13 @@ function loadModule() {
     else if (options.ollama_server) {
         ollamaServer(options.ollama_server);
     }
+    else if (options.view_config) {
+        viewConfig(options.view_config);
+    }
     else if (options.pattern) {
         processPattern(options);
     }
     else {
-        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge]');
+        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge, --view_config]');
     }
 }

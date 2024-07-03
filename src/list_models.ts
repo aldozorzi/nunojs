@@ -3,23 +3,28 @@ import Configstore from 'configstore';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
-import { describe } from "node:test";
-import { ollamaServer } from "./ollama_server.js";
+import { Cache } from 'file-system-cache';
 
 
 
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-type Cache = { openAIModels?: string[], googleModels?: string[], anthropicModels?: string[], ollamaModels?: string[] };
-let cache: Cache = {};
+let showWarning = true;
+const cache = new Cache({
+  ttl: 3600
+});
+
+function writeWarning(text:string){
+  if(!showWarning) return;
+  Format.warning('Retrieving models from OpenAI failed');
+}
 
 async function getOpenAIModelsData(): Promise<string[]> {
   if (!config.has('openAiKey') || config.get('openAiKey') == '') {
     return [];
   }
-
-  if (!cache.openAIModels) {
+  if (!await cache.get('openAIModels')) {
     try {
       const openai = new OpenAI({
         apiKey: config.get('openAiKey'),
@@ -30,20 +35,20 @@ async function getOpenAIModelsData(): Promise<string[]> {
         if (model.id.indexOf('gpt') > -1)
           result.push(model.id);
       }
-      cache.openAIModels = result;
+      await cache.set('openAIModels',result);
     } catch (e: any) {
-      Format.warning('Retrieving models from OpenAI failed');
-      cache.openAIModels = [];
+      writeWarning('Retrieving models from OpenAI failed');
+      return [];
     }
   }
-  return cache.openAIModels;
+  return await cache.get('openAIModels');
 }
 
 async function getGoogleModelsData(): Promise<string[]> {
   if (!config.has('googleKey') || config.get('googleKey') == '') {
     return [];
   }
-  if (!cache.googleModels) {
+  if (!await cache.get('googleModels')) {
     try {
       const response = await fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
       if (!response.ok) {
@@ -59,13 +64,13 @@ async function getGoogleModelsData(): Promise<string[]> {
         if (model.name.indexOf('gemini') > -1)
           result.push(model.name.replace('models/', ''));
       }
-      cache.googleModels = result;
+      await cache.set('googleModels',result);
     } catch (e: any) {
-      Format.warning('Retrieving models from Google failed');
-      cache.googleModels = [];
+      writeWarning('Retrieving models from Google failed');
+      return [];
     }
   }
-  return cache.googleModels;
+  return await cache.get('googleModels');
 }
 
 async function getOllamaModelsData(): Promise<string[]> {
@@ -73,7 +78,7 @@ async function getOllamaModelsData(): Promise<string[]> {
     return [];
   }
 
-  if (!cache.ollamaModels) {
+  if (! await cache.get('ollamaModels')) {
     try {
       const response = await fetch(`${config.get('ollamaServer')}/api/tags`);
       if (!response.ok) {
@@ -89,13 +94,13 @@ async function getOllamaModelsData(): Promise<string[]> {
         const model = data.models[key];
         result.push(model.name);
       }
-      cache.ollamaModels = result;
+      await cache.set('ollamaModels',result);
     } catch (e: any) {
-      Format.warning('Retrieving models from Ollama failed');
-      cache.ollamaModels = [];
+      writeWarning('Retrieving models from Ollama failed');
+      return [];
     }
   }
-  return cache.ollamaModels;
+  return await cache.get('ollamaModels');
 }
 
 async function getModelsData(): Promise<string[]> {
@@ -108,6 +113,7 @@ async function getModelsData(): Promise<string[]> {
 
 export async function getModelsList() {
   try {
+    showWarning = false;
     const list = await getModelsData();
     return list;
   }
@@ -118,6 +124,7 @@ export async function getModelsList() {
 
 export async function getModels() {
   try {
+    showWarning = true;
     const list = await getModelsData();
     if (list.length == 0) {
       Format.warning('No models found, please set at least an API key using nunojs --setup');

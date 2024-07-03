@@ -19,16 +19,25 @@ import Configstore from 'configstore';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
+import { Cache } from 'file-system-cache';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-let cache = {};
+let showWarning = true;
+const cache = new Cache({
+    ttl: 3600
+});
+function writeWarning(text) {
+    if (!showWarning)
+        return;
+    Format.warning('Retrieving models from OpenAI failed');
+}
 function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_1, _b, _c;
         if (!config.has('openAiKey') || config.get('openAiKey') == '') {
             return [];
         }
-        if (!cache.openAIModels) {
+        if (!(yield cache.get('openAIModels'))) {
             try {
                 const openai = new OpenAI({
                     apiKey: config.get('openAiKey'),
@@ -51,14 +60,14 @@ function getOpenAIModelsData() {
                     }
                     finally { if (e_1) throw e_1.error; }
                 }
-                cache.openAIModels = result;
+                yield cache.set('openAIModels', result);
             }
             catch (e) {
-                Format.warning('Retrieving models from OpenAI failed');
-                cache.openAIModels = [];
+                writeWarning('Retrieving models from OpenAI failed');
+                return [];
             }
         }
-        return cache.openAIModels;
+        return yield cache.get('openAIModels');
     });
 }
 function getGoogleModelsData() {
@@ -66,7 +75,7 @@ function getGoogleModelsData() {
         if (!config.has('googleKey') || config.get('googleKey') == '') {
             return [];
         }
-        if (!cache.googleModels) {
+        if (!(yield cache.get('googleModels'))) {
             try {
                 const response = yield fetch('https://generativelanguage.googleapis.com/v1/models', { headers: { 'x-goog-api-key': config.get('googleKey') } });
                 if (!response.ok) {
@@ -81,14 +90,14 @@ function getGoogleModelsData() {
                     if (model.name.indexOf('gemini') > -1)
                         result.push(model.name.replace('models/', ''));
                 }
-                cache.googleModels = result;
+                yield cache.set('googleModels', result);
             }
             catch (e) {
-                Format.warning('Retrieving models from Google failed');
-                cache.googleModels = [];
+                writeWarning('Retrieving models from Google failed');
+                return [];
             }
         }
-        return cache.googleModels;
+        return yield cache.get('googleModels');
     });
 }
 function getOllamaModelsData() {
@@ -96,7 +105,7 @@ function getOllamaModelsData() {
         if (!config.has('ollamaServer') || config.get('ollamaServer') == '') {
             return [];
         }
-        if (!cache.ollamaModels) {
+        if (!(yield cache.get('ollamaModels'))) {
             try {
                 const response = yield fetch(`${config.get('ollamaServer')}/api/tags`);
                 if (!response.ok) {
@@ -110,14 +119,14 @@ function getOllamaModelsData() {
                     const model = data.models[key];
                     result.push(model.name);
                 }
-                cache.ollamaModels = result;
+                yield cache.set('ollamaModels', result);
             }
             catch (e) {
-                Format.warning('Retrieving models from Ollama failed');
-                cache.ollamaModels = [];
+                writeWarning('Retrieving models from Ollama failed');
+                return [];
             }
         }
-        return cache.ollamaModels;
+        return yield cache.get('ollamaModels');
     });
 }
 function getModelsData() {
@@ -131,6 +140,7 @@ function getModelsData() {
 export function getModelsList() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            showWarning = false;
             const list = yield getModelsData();
             return list;
         }
@@ -142,6 +152,7 @@ export function getModelsList() {
 export function getModels() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
+            showWarning = true;
             const list = yield getModelsData();
             if (list.length == 0) {
                 Format.warning('No models found, please set at least an API key using nunojs --setup');
