@@ -1,32 +1,33 @@
 #! /usr/bin/env node
 import fs from 'fs';
-import { Format } from "./lib/format.js";
-import { Command } from "commander";
-import { processPattern } from "./pattern.js";
-import { initSetup } from "./setup.js";
-import { updatePatterns } from "./update.js";
-import { getList } from "./list.js";
+import { Format } from './lib/format.js';
+import { Command } from 'commander';
+import { processPattern } from './pattern.js';
+import { initSetup } from './setup.js';
+import { updatePatterns } from './update.js';
+import { getList } from './list.js';
 import { getModels } from './list_models.js';
 import { defaultModel } from './default_model.js';
 import { ollamaServer } from './ollama_server.js';
 const program = new Command();
 program
-    .version("1.0.0")
-    .description("A JS framework for augmenting humans AI.");
-program.option("-p, --pattern <pattern-name>", "Set the pattern (prompt) to use")
-    .option("-t, --text <text>", "Text to analyze")
-    .option("-o, --output <filepath/to/filename.md>", "Save the result to a file")
-    .option("-s, --stream", "Use this option if you want to see the results in realtime. NOTE: you can't pipe the output into another command, or use with --output")
-    .option("-l, --list", "List available patterns")
-    .option("--temp <temperature>", "Set the temperature for the model. Default is 0")
-    .option("--top_p <top_p>", "Set the top_p for the model. Default is 1")
-    .option("--frequency_penalty <frequency_penalty >", "sets the presence penalty for the model. Default is 0.1")
-    .option("-u, --update", "Update patterns (git > 2.24 required)")
-    .option("--setup", "Set up your NunoJS instance")
-    .option("--list_models", "List all available models")
-    .option("-m, --model <model>", "Set the model to use")
-    .option("--default_model <model>", "Set the default model to use")
-    .option("--ollama_server [server]", "Set The URL of the remote ollamaserver to use.");
+    .version('1.0.0')
+    .description('A JS framework for augmenting humans AI.');
+program.option('-p, --pattern <pattern-name>', 'Set the pattern (prompt) to use')
+    .option('-t, --text <text>', 'Text to analyze')
+    .option('-o, --output <filepath/to/filename.md>', 'Save the result to a file')
+    .option('-s, --stream', 'Use this option if you want to see the results in realtime. NOTE: you can\'t pipe the output into another command, or use with --output')
+    .option('-l, --list', 'List available patterns')
+    .option('--temp <temperature>', 'Set the temperature for the model. Default is 0')
+    .option('--top_p <top_p>', 'Set the top_p for the model. Default is 1')
+    .option('--frequency_penalty <frequency_penalty >', 'sets the presence penalty for the model. Default is 0.1')
+    .option('-u, --update', 'Update patterns (git > 2.24 required)')
+    .option('--setup', 'Set up your NunoJS instance')
+    .option('--view_config', 'View your instance config')
+    .option('--list_models', 'List all available models')
+    .option('-m, --model <model>', 'Set the model to use')
+    .option('--default_model <model>', 'Set the default model to use')
+    .option('--ollama_server [server]', 'Set The URL of the remote ollamaserver to use.');
 const dir = fs.readdirSync('./patterns');
 const custom_dir = fs.readdirSync('./custom_patterns');
 let patternCommand = '';

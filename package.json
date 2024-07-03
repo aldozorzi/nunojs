@@ -15,7 +15,8 @@
   },
   "bin": {
     "nunojs": "./dist/index.js",
-    "nuno": "./dist/index.js"
+    "nuno": "./dist/index.js",
+    "yt": "./dist/youtube.js"
   },
   "keywords": [],
   "author": "",
@@ -34,7 +35,8 @@
     "log-symbols": "^6.0.0",
     "openai": "^4.52.0",
     "ora": "^8.0.1",
-    "simple-git": "^3.25.0"
+    "simple-git": "^3.25.0",
+    "youtube-transcript": "^1.2.1"
   },
   "devDependencies": {
     "@types/node": "^20.14.5",
