@@ -76,6 +76,8 @@ function getApiKey() {
             return config.get('googleKey');
         else if (provider == 'mistral')
             return config.get('mistralKey');
+        else if (provider == 'anthropic')
+            return config.get('anthropicKey');
         return '';
     });
 }
@@ -111,7 +113,7 @@ function loadPattern() {
             else {
                 adapterParams.apiKey = yield getApiKey();
             }
-            console.log(adapterParams);
+            //console.log(adapterParams);
             const adapter = new llmAdapter(adapterParams);
             const chatCompletion = yield adapter.create({
                 system: pattern,

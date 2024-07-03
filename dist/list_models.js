@@ -32,32 +32,6 @@ function writeWarning(text) {
         return;
     Format.warning('Retrieving models from OpenAI failed');
 }
-function getMistralModelsData() {
-    return __awaiter(this, void 0, void 0, function* () {
-        if (!config.has('mistralKey') || config.get('mistralKey') == '') {
-            return [];
-        }
-        if (!(yield cache.get('mistralModels'))) {
-            try {
-                const client = new MistralClient(config.get('mistralKey'));
-                const list = yield client.listModels();
-                //console.log(list.data);
-                let result = [];
-                for (let key in list.data) {
-                    const model = list.data[key];
-                    //console.log(model)
-                    result.push(model.id);
-                }
-                yield cache.set('mistralModels', result);
-            }
-            catch (e) {
-                writeWarning('Retrieving models from OpenAI failed');
-                return [];
-            }
-        }
-        return yield cache.get('mistralModels');
-    });
-}
 function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_1, _b, _c;
@@ -156,13 +130,48 @@ function getOllamaModelsData() {
         return yield cache.get('ollamaModels');
     });
 }
+function getMistralModelsData() {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (!config.has('mistralKey') || config.get('mistralKey') == '') {
+            return [];
+        }
+        if (!(yield cache.get('mistralModels'))) {
+            try {
+                const client = new MistralClient(config.get('mistralKey'));
+                const list = yield client.listModels();
+                //console.log(list.data);
+                let result = [];
+                for (let key in list.data) {
+                    const model = list.data[key];
+                    //console.log(model)
+                    result.push(model.id);
+                }
+                yield cache.set('mistralModels', result);
+            }
+            catch (e) {
+                writeWarning('Retrieving models from OpenAI failed');
+                return [];
+            }
+        }
+        return yield cache.get('mistralModels');
+    });
+}
+function getAnthropicModelsData() {
+    return [
+        'claude-3-5-sonnet-20240620',
+        'claude-3-opus-20240229',
+        'claude-3-sonnet-20240229',
+        'claude-3-haiku-20240307'
+    ];
+}
 function getModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
         const openAIdata = yield getOpenAIModelsData();
         const googleData = yield getGoogleModelsData();
         const ollamaData = yield getOllamaModelsData();
         const mistralData = yield getMistralModelsData();
-        return [...openAIdata, ...googleData, ...ollamaData, ...mistralData];
+        const anthropicData = yield getAnthropicModelsData();
+        return [...openAIdata, ...googleData, ...ollamaData, ...mistralData, ...anthropicData];
     });
 }
 export function getModelsList() {
@@ -206,11 +215,15 @@ export function getProvider(model) {
         const googleAiData = yield getGoogleModelsData();
         const ollamaData = yield getOllamaModelsData();
         const mistralData = yield getMistralModelsData();
+        const anthropiclData = getAnthropicModelsData();
         if (openAiData.indexOf(model) > -1) {
             return 'open-ai';
         }
         else if (googleAiData.indexOf(model) > -1) {
             return 'google';
+        }
+        else if (anthropiclData.indexOf(model) > -1) {
+            return 'anthropic';
         }
         else if (ollamaData.indexOf(model) > -1) {
             return 'ollama';

@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import MistralClient from '@mistralai/mistralai';
+import Anthropic from "@anthropic-ai/sdk";
 import Configstore from 'configstore';
 import fs from 'fs';
 import fetch from 'node-fetch';
@@ -18,31 +19,7 @@ function writeWarning(text: string) {
   Format.warning('Retrieving models from OpenAI failed');
 }
 
-async function getMistralModelsData(): Promise<string[]> {
-  if (!config.has('mistralKey') || config.get('mistralKey') == '') {
-    return [];
-  }
 
-  if (!await cache.get('mistralModels')) {
-    try {
-
-      const client = new MistralClient(config.get('mistralKey'));
-      const list = await client.listModels();
-      //console.log(list.data);
-      let result = [];
-      for (let key in list.data) {
-        const model = list.data[key];
-        //console.log(model)
-        result.push(model.id);
-      }
-      await cache.set('mistralModels', result);
-    } catch (e: any) {
-      writeWarning('Retrieving models from OpenAI failed');
-      return [];
-    }
-  }
-  return await cache.get('mistralModels');
-}
 
 async function getOpenAIModelsData(): Promise<string[]> {
   if (!config.has('openAiKey') || config.get('openAiKey') == '') {
@@ -127,12 +104,47 @@ async function getOllamaModelsData(): Promise<string[]> {
   return await cache.get('ollamaModels');
 }
 
+async function getMistralModelsData(): Promise<string[]> {
+  if (!config.has('mistralKey') || config.get('mistralKey') == '') {
+    return [];
+  }
+
+  if (!await cache.get('mistralModels')) {
+    try {
+
+      const client = new MistralClient(config.get('mistralKey'));
+      const list = await client.listModels();
+      //console.log(list.data);
+      let result = [];
+      for (let key in list.data) {
+        const model = list.data[key];
+        //console.log(model)
+        result.push(model.id);
+      }
+      await cache.set('mistralModels', result);
+    } catch (e: any) {
+      writeWarning('Retrieving models from OpenAI failed');
+      return [];
+    }
+  }
+  return await cache.get('mistralModels');
+}
+function getAnthropicModelsData() : string[] {
+  return [
+    'claude-3-5-sonnet-20240620',
+    'claude-3-opus-20240229',
+    'claude-3-sonnet-20240229',
+    'claude-3-haiku-20240307'
+  ]
+}
+
 async function getModelsData(): Promise<string[]> {
   const openAIdata = await getOpenAIModelsData();
   const googleData = await getGoogleModelsData();
   const ollamaData = await getOllamaModelsData();
   const mistralData = await getMistralModelsData();
-  return [...openAIdata, ...googleData, ...ollamaData, ...mistralData];
+  const anthropicData = await getAnthropicModelsData();
+  return [...openAIdata, ...googleData, ...ollamaData, ...mistralData,...anthropicData];
 
 }
 
@@ -175,6 +187,7 @@ export async function getProvider(model: string): Promise<'open-ai' | 'google' |
   const googleAiData = await getGoogleModelsData();
   const ollamaData = await getOllamaModelsData();
   const mistralData = await getMistralModelsData();
+  const anthropiclData = getAnthropicModelsData();
   
   if (openAiData.indexOf(model)>-1) {
     return 'open-ai';
@@ -182,12 +195,16 @@ export async function getProvider(model: string): Promise<'open-ai' | 'google' |
   else if (googleAiData.indexOf(model)>-1) {
     return 'google';
   }
+  else if (anthropiclData.indexOf(model)>-1) {
+    return 'anthropic';
+  }
   else if (ollamaData.indexOf(model)>-1) {
     return 'ollama';
   }
   else if (mistralData.indexOf(model)>-1) {
     return 'mistral';
   }
+  
   //console.log('model is there:',(model in await getMistralModelsData()))
   return 'open-ai';
 }

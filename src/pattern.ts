@@ -56,6 +56,8 @@ async function getApiKey() : Promise<string>{
         return config.get('googleKey');
     else if(provider == 'mistral')
         return config.get('mistralKey');
+    else if(provider == 'anthropic')
+        return config.get('anthropicKey');
     return '';
 }
 
@@ -93,7 +95,7 @@ async function loadPattern() {
         }else{
             adapterParams.apiKey = await getApiKey();
         }
-        console.log(adapterParams);
+        //console.log(adapterParams);
         const adapter = new llmAdapter(adapterParams);
         const chatCompletion = await adapter.create({
             system: pattern,
