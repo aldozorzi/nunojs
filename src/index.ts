@@ -12,6 +12,7 @@ import { getModels } from './list_models.js';
 import { defaultModel } from './default_model.js';
 import { ollamaServer } from './ollama_server.js';
 import { viewConfig } from './view_config.js';
+import { resetConfig } from './reset_config.js';
 
 
 const program = new Command('nunojs');
@@ -31,6 +32,7 @@ program.option('-p, --pattern <pattern-name>', 'Set the pattern (prompt) to use'
     .option('-u, --update', 'Update patterns (git > 2.24 required)')
     .option('--setup', 'Set up your NunoJS instance')
     .option('--view_config', 'View your instance config')
+    .option('--reset', 'Delete your instance config')
     .option('--list_models', 'List all available models')
     .option('-m, --model <model>', 'Set the model to use')
     .option('--default_model <model>', 'Set the default model to use')
@@ -107,10 +109,13 @@ function loadModule() {
     else if (options.view_config) {
         viewConfig();
     }
+    else if (options.reset) {
+        resetConfig();
+    }
     else if (options.pattern) {
         processPattern();
     }
     else {
-        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge, --view_config]');
+        Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge, --view_config, --reset]');
     }
 }
