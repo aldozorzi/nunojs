@@ -10,6 +10,7 @@ import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 import { getProvider } from './list_models.js';
 import { manageError } from './error_manager.js';
+import { options } from './index.js';
 
 interface Message {
     role: 'system' | 'user' | 'assistant';
@@ -18,7 +19,7 @@ interface Message {
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-var options: OptionValues;
+//var options: OptionValues;
 
 async function loadPipedText() {
     const t = setTimeout(() => {
@@ -63,7 +64,7 @@ async function getApiKey() : Promise<string>{
 }
 
 async function loadPattern() {
-    const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
+    const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' }).start();
     try {
         let patternFile = `./patterns/${options.pattern}/system.md`;
         let userFile = `./patterns/${options.pattern}/user.md`;
@@ -134,8 +135,8 @@ async function loadPattern() {
     }
 }
 
-export async function processPattern(opt: OptionValues) {
-    options = opt;
+export async function processPattern() {
+    //options = opt;
     if (!config.get('openAiKey'))
         return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
     if (options.model && !await checkModel(options.model))

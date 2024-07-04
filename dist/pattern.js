@@ -23,9 +23,10 @@ import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 import { getProvider } from './list_models.js';
 import { manageError } from './error_manager.js';
+import { options } from './index.js';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-var options;
+//var options: OptionValues;
 function loadPipedText() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_1, _b, _c;
@@ -85,7 +86,7 @@ function getApiKey() {
 function loadPattern() {
     return __awaiter(this, void 0, void 0, function* () {
         var _a, e_2, _b, _c;
-        const spinner = ora({ text: Format.infoColor('AI is working hard...'), color: 'blue' }).start();
+        const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' }).start();
         try {
             let patternFile = `./patterns/${options.pattern}/system.md`;
             let userFile = `./patterns/${options.pattern}/user.md`;
@@ -167,9 +168,9 @@ function loadPattern() {
         }
     });
 }
-export function processPattern(opt) {
+export function processPattern() {
     return __awaiter(this, void 0, void 0, function* () {
-        options = opt;
+        //options = opt;
         if (!config.get('openAiKey'))
             return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
         if (options.model && !(yield checkModel(options.model)))

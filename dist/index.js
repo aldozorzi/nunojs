@@ -92,7 +92,7 @@ function loadModule() {
         viewConfig();
     }
     else if (options.pattern) {
-        processPattern(options);
+        processPattern();
     }
     else {
         Format.error('missing command [--pattern, --setup, --update, --list_models, --default_model, --ollama_server, --merge, --view_config]');
