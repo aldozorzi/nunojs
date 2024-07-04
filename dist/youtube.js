@@ -12,6 +12,7 @@ import { YoutubeTranscript } from 'youtube-transcript';
 import { Command } from 'commander';
 import { Format } from './lib/format.js';
 import { YoutubeTranscriptNotAvailableLanguageError } from 'youtube-transcript';
+import { manageError } from './error_manager.js';
 export function getYTTranscript(video_id_1) {
     return __awaiter(this, arguments, void 0, function* (video_id, lang = 'en') {
         let transcriptsData;
@@ -27,10 +28,13 @@ export function getYTTranscript(video_id_1) {
                     if (ee instanceof YoutubeTranscriptNotAvailableLanguageError) {
                         return Format.error(`In this video there is no trascripts for language: "${lang}", try to set a different language with -l param`);
                     }
+                    else {
+                        manageError(ee, true);
+                    }
                 }
             }
             else {
-                return Format.error(e.toString());
+                manageError(e, true);
             }
         }
         if (transcriptsData) {

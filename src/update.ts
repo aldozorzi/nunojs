@@ -3,6 +3,7 @@ import { Format } from './lib/format.js';
 import fs from "fs/promises";
 import fse from 'fs-extra/esm';
 import { simpleGit, SimpleGit, CleanOptions } from 'simple-git';
+import { manageError } from './error_manager.js';
 
 export async function updatePatterns() {
 
@@ -35,8 +36,8 @@ export async function updatePatterns() {
 
         spinner.succeed(Format.successColor('Patterns updated!'));
         
-      } catch (err) {
-        console.error(err);
+      } catch (e:any) {
+        manageError(e);
       }
 }
 

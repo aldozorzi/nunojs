@@ -6,6 +6,8 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 import { Cache } from 'file-system-cache';
+import { manageError } from "./error_manager.js";
+import { options } from "./index.js";
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
@@ -15,8 +17,8 @@ const cache = new Cache({
 });
 
 function writeWarning(text: string) {
-  if (!showWarning) return;
-  Format.warning('Retrieving models from OpenAI failed');
+  if (showWarning && options.debug) Format.warning(text);
+  
 }
 
 
@@ -123,7 +125,7 @@ async function getMistralModelsData(): Promise<string[]> {
       }
       await cache.set('mistralModels', result);
     } catch (e: any) {
-      writeWarning('Retrieving models from OpenAI failed');
+      writeWarning('Retrieving models from Mistral failed');
       return [];
     }
   }
@@ -155,7 +157,7 @@ export async function getModelsList() {
     return list;
   }
   catch (e: any) {
-    Format.error(e.toString());
+    manageError(e)
   }
 }
 
@@ -172,7 +174,7 @@ export async function getModels() {
 
   }
   catch (e: any) {
-    Format.error(e.toString());
+    manageError(e)
   }
 }
 

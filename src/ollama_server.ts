@@ -1,6 +1,7 @@
 import fs from 'fs';
 import Configstore from 'configstore';
 import { Format } from './lib/format.js';
+import { manageError } from './error_manager.js';
 
 export async function ollamaServer(server: string | true) {
     if(server === true) server = '';
@@ -18,7 +19,8 @@ export async function ollamaServer(server: string | true) {
         
         Format.success(server == '' ? 'Ollama server cleared' : `Ollama server model set to ${server}`);
     } catch (e: any) {
-        Format.error(e.toString());
+        manageError(e);
+        
     }
 
 

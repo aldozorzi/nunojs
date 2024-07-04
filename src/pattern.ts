@@ -9,6 +9,7 @@ import ora from 'ora';
 import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 import { getProvider } from './list_models.js';
+import { manageError } from './error_manager.js';
 
 interface Message {
     role: 'system' | 'user' | 'assistant';
@@ -114,6 +115,7 @@ async function loadPattern() {
                     return spinner.succeed(Format.successColor('File saved!'));
                 } catch (e: any) {
                     spinner.fail(Format.errorColor(e.toString()));
+                    manageError(e,true);
                 }
             } else {
                 spinner.stop();
@@ -128,6 +130,7 @@ async function loadPattern() {
 
     } catch (e: any) {
         spinner.fail(Format.errorColor(e.toString()));
+        manageError(e,true);
     }
 }
 

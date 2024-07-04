@@ -28,7 +28,8 @@ program.option('-p, --pattern <pattern-name>', 'Set the pattern (prompt) to use'
     .option('--list_models', 'List all available models')
     .option('-m, --model <model>', 'Set the model to use')
     .option('--default_model <model>', 'Set the default model to use')
-    .option('--ollama_server [server]', 'Set The URL of the remote ollamaserver to use.');
+    .option('--ollama_server [server]', 'Set The URL of the remote ollamaserver to use.')
+    .option('--debug', 'Set debug mode');
 const dir = fs.readdirSync('./patterns');
 const custom_dir = fs.readdirSync('./custom_patterns');
 let patternCommand = '';
@@ -58,7 +59,7 @@ catch (e) {
     Format.error(e.toString());
 }
 program.parse(process.argv);
-const options = program.opts();
+export const options = program.opts();
 if (patternCommand != '') {
     options.pattern = patternCommand;
     options.text = patternArg;

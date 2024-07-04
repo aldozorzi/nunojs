@@ -22,6 +22,7 @@ import ora from 'ora';
 import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 import { getProvider } from './list_models.js';
+import { manageError } from './error_manager.js';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
 var options;
@@ -133,6 +134,7 @@ function loadPattern() {
                     }
                     catch (e) {
                         spinner.fail(Format.errorColor(e.toString()));
+                        manageError(e, true);
                     }
                 }
                 else {
@@ -161,6 +163,7 @@ function loadPattern() {
         }
         catch (e) {
             spinner.fail(Format.errorColor(e.toString()));
+            manageError(e, true);
         }
     });
 }

@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import fs from 'fs';
 import Configstore from 'configstore';
 import { Format } from './lib/format.js';
+import { manageError } from './error_manager.js';
 export function ollamaServer(server) {
     return __awaiter(this, void 0, void 0, function* () {
         if (server === true)
@@ -27,7 +28,7 @@ export function ollamaServer(server) {
             Format.success(server == '' ? 'Ollama server cleared' : `Ollama server model set to ${server}`);
         }
         catch (e) {
-            Format.error(e.toString());
+            manageError(e);
         }
     });
 }

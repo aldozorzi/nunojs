@@ -21,6 +21,8 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 import { Cache } from 'file-system-cache';
+import { manageError } from "./error_manager.js";
+import { options } from "./index.js";
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
 let showWarning = true;
@@ -28,9 +30,8 @@ const cache = new Cache({
     ttl: 3600
 });
 function writeWarning(text) {
-    if (!showWarning)
-        return;
-    Format.warning('Retrieving models from OpenAI failed');
+    if (showWarning && options.debug)
+        Format.warning(text);
 }
 function getOpenAIModelsData() {
     return __awaiter(this, void 0, void 0, function* () {
@@ -149,7 +150,7 @@ function getMistralModelsData() {
                 yield cache.set('mistralModels', result);
             }
             catch (e) {
-                writeWarning('Retrieving models from OpenAI failed');
+                writeWarning('Retrieving models from Mistral failed');
                 return [];
             }
         }
@@ -182,7 +183,7 @@ export function getModelsList() {
             return list;
         }
         catch (e) {
-            Format.error(e.toString());
+            manageError(e);
         }
     });
 }
@@ -199,7 +200,7 @@ export function getModels() {
             }
         }
         catch (e) {
-            Format.error(e.toString());
+            manageError(e);
         }
     });
 }
