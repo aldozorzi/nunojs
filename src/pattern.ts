@@ -1,5 +1,5 @@
 import { OptionValues } from 'commander';
-import fs from 'fs';
+import fs, { PathLike } from 'fs';
 import fse from 'fs-extra/esm';
 import { llmAdapter } from '@ldazrz/llm-adapters'
 import { Config } from '@ldazrz/llm-adapters/types.js'
@@ -19,22 +19,23 @@ interface Message {
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
+const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' })
 //var options: OptionValues;
 
 async function loadPipedText() {
     const t = setTimeout(() => {
         process.stdin.removeAllListeners().end().destroy();
-        loadPattern();
+        buildPattern();
     }, 100);
     options.text = '';
     for await (const chunk of process.stdin) {
         options.text += chunk;
     }
     clearTimeout(t);
-    loadPattern();
+    buildPattern();
 }
 
-function getModel() :string {
+function getModel(): string {
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -50,57 +51,59 @@ function getModel() :string {
     return '';
 }
 
-async function getApiKey() : Promise<string>{
+async function getApiKey(): Promise<string> {
     const provider = await getProvider(getModel());
-    if(provider == 'open-ai')
+    if (provider == 'open-ai')
         return config.get('openAiKey');
-    else if(provider == 'google')
+    else if (provider == 'google')
         return config.get('googleKey');
-    else if(provider == 'mistral')
+    else if (provider == 'mistral')
         return config.get('mistralKey');
-    else if(provider == 'anthropic')
+    else if (provider == 'anthropic')
         return config.get('anthropicKey');
     return '';
 }
 
-async function loadPattern() {
-    const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' }).start();
-    try {
-        let patternFile = `./patterns/${options.pattern}/system.md`;
-        let userFile = `./patterns/${options.pattern}/user.md`;
-        const customPatternFile = `./custom_patterns/${options.pattern}/system.md`;
-        const customUserFile = `./custom_patterns/${options.pattern}/user.md`;
+async function getPatternFile(): Promise<PathLike | false> {
+    let patternFile = `./patterns/${options.pattern}/system.md`;
+    const customPatternFile = `./custom_patterns/${options.pattern}/system.md`;
 
-        const fileExists = await fse.pathExists(patternFile);
-        const userFileExists = await fse.pathExists(userFile);
-        const customFileExists = await fse.pathExists(customPatternFile);
-        const customUserFileExists = await fse.pathExists(customUserFile);
+    const patternFileExists = await fse.pathExists(patternFile);
+    const customPatternFileExists = await fse.pathExists(customPatternFile);
 
-        if (!fileExists && !customFileExists)
-            return spinner.fail(Format.errorColor(`Pattern "${options.pattern}" doesn't exists`));
-        else if (customFileExists)
-            patternFile = customPatternFile;
-        if ((!options.text || options.text == "")) {
-            if (fileExists && userFileExists)
-                options.text = await fs.promises.readFile(userFile, 'utf8');
-            else if (customFileExists && customUserFileExists)
-                options.text = await fs.promises.readFile(customUserFile, 'utf8');
-        }
+    if (!patternFileExists && !customPatternFileExists)
+        return false
+    else if (customPatternFileExists)
+        patternFile = customPatternFile
+    return patternFile
+}
 
-        const pattern = await fs.promises.readFile(patternFile, 'utf8');
-        
-        const provider = await getProvider(getModel());
-        let adapterParams:Config = { provider:provider }
-        if(provider == 'ollama')
-        {
+async function getUserFile(): Promise<PathLike | false> {
+    let userFile = `./patterns/${options.pattern}/user.md`;
+    const customUserFile = `./custom_patterns/${options.pattern}/user.md`;
+
+    const userFileExists = await fse.pathExists(userFile);
+    const customUserFileExists = await fse.pathExists(customUserFile);
+
+    if (!userFileExists && !customUserFileExists)
+        return false
+    else if (customUserFileExists)
+        userFile = customUserFile
+    return userFile
+}
+
+async function buildAdapter(system:string){
+    const provider = await getProvider(getModel());
+        let adapterParams: Config = { provider: provider }
+        if (provider == 'ollama') {
             adapterParams.serverUrl = config.get('ollamaServer');
-        }else{
+        } else {
             adapterParams.apiKey = await getApiKey();
         }
-        //console.log(adapterParams);
+
         const adapter = new llmAdapter(adapterParams);
         const chatCompletion = await adapter.create({
-            system: pattern,
+            system: system,
             user: options.text,
             model: getModel(),
             stream: options.stream === true && !options.output,
@@ -108,30 +111,52 @@ async function loadPattern() {
             top_p: options.top_p || 1,
             temperature: options.temperature || 1,
         });
-        if ('content' in chatCompletion) {
-            if (options.output) {
-                try {
-                    await fse.ensureFile(options.output);
-                    const result = await fs.promises.writeFile(options.output, chatCompletion.content || "");
-                    return spinner.succeed(Format.successColor('File saved!'));
-                } catch (e: any) {
-                    spinner.fail(Format.errorColor(e.toString()));
-                    manageError(e,true);
-                }
-            } else {
-                spinner.stop();
-                process.stdout.write(chatCompletion.content || "");
+        manageResponse(chatCompletion);
+}
+
+async function manageResponse(chatCompletion:any){
+    if ('content' in chatCompletion) {
+        if (options.output) {
+            try {
+                await fse.ensureFile(options.output);
+                const result = await fs.promises.writeFile(options.output, chatCompletion.content || "");
+                return spinner.succeed(Format.successColor('File saved!'));
+            } catch (e: any) {
+                spinner.fail(Format.errorColor(e.toString()));
+                manageError(e, true);
             }
-        }else{
+        } else {
             spinner.stop();
-            for await (const chunk of chatCompletion) {
-                process.stdout.write(chunk.content || '');
-            }
+            process.stdout.write(chatCompletion.content || "");
         }
+    } else {
+        spinner.stop();
+        for await (const chunk of chatCompletion) {
+            process.stdout.write(chunk.content || '');
+        }
+    }
+}
+
+async function buildPattern() {
+    spinner.start();
+    try {
+        let patternFile = await getPatternFile();
+        let userFile = await getUserFile();
+
+        if (!patternFile)
+            return spinner.fail(Format.errorColor(`Pattern "${options.pattern}" doesn't exists`));
+
+        if ((!options.text || options.text == "")) {
+            if (userFile)
+                options.text = await fs.promises.readFile(userFile, 'utf8');
+        }
+        const pattern = await fs.promises.readFile(patternFile, 'utf8');
+        buildAdapter(pattern)
+        
 
     } catch (e: any) {
         spinner.fail(Format.errorColor(e.toString()));
-        manageError(e,true);
+        manageError(e, true);
     }
 }
 
@@ -145,7 +170,7 @@ export async function processPattern() {
         loadPipedText();
     }
     else {
-        loadPattern();
+        buildPattern();
     }
 
 }
