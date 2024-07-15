@@ -26,7 +26,7 @@ import { manageError } from './error_manager.js';
 import { getOptions, setOptions } from './options.js';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' });
+const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'cyan' });
 //var options: OptionValues;
 function loadPipedText() {
     return __awaiter(this, void 0, void 0, function* () {

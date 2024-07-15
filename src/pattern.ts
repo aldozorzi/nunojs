@@ -22,7 +22,7 @@ interface Message {
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'blue' })
+const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'cyan' })
 //var options: OptionValues;
 
 async function loadPipedText() {

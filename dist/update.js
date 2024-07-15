@@ -18,7 +18,7 @@ export function updatePatterns() {
         const filter = [
             'show_fabric_options_markmap'
         ];
-        const spinner = ora({ text: Format.infoColor('Loading patterns...'), color: 'blue' }).start();
+        const spinner = ora({ text: Format.infoColor('Loading patterns...'), color: 'cyan' }).start();
         const dir = './patterns/_updating_patterns';
         try {
             yield fse.ensureDir(dir);
@@ -31,7 +31,8 @@ export function updatePatterns() {
             yield fs.rm(dir, { recursive: true });
             for (let each in filter) {
                 let dirToRemove = filter[each];
-                yield fs.rm(`./patterns/${dirToRemove}`, { recursive: true });
+                if (yield fse.pathExists(`./patterns/${dirToRemove}`))
+                    yield fs.rm(`./patterns/${dirToRemove}`, { recursive: true });
             }
             spinner.succeed(Format.successColor('Patterns updated!'));
         }

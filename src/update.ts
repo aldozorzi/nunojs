@@ -11,7 +11,7 @@ export async function updatePatterns() {
       'show_fabric_options_markmap'
     ];
     
-    const spinner = ora({text:Format.infoColor('Loading patterns...'),color:'blue'}).start();
+    const spinner = ora({text:Format.infoColor('Loading patterns...'),color:'cyan'}).start();
 
     const dir = './patterns/_updating_patterns';
     try {
@@ -27,7 +27,8 @@ export async function updatePatterns() {
         for (let each in filter)
           {
             let dirToRemove = filter[each];
-            await fs.rm(`./patterns/${dirToRemove}`,{recursive:true});
+            if(await fse.pathExists(`./patterns/${dirToRemove}`))
+              await fs.rm(`./patterns/${dirToRemove}`,{recursive:true});
           }
 
 
