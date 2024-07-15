@@ -7,7 +7,8 @@ NunoJS was born from an idea by [Daniel Miessler](https://danielmiessler.com), w
 
 ```bash
 git  clone  https://github.com/aldozorzi/nunojs
-npm  install -g nunojs
+cd nunojs
+npm  install
 npm link
 ```
 
@@ -21,13 +22,13 @@ and complete api key setup.
 
 Then, you may want to launch:
 
-` nunojs --default_model gpt-3.5-turbo `
-
-to set a default model for your calls. Use 
-
 ` nunojs --list_models `
 
 to get a list of all available models, based on the API keys you set during --setup.
+
+Then you can set a default model for your calls, using:
+
+` nunojs --default_model gpt-3.5-turbo `
 
 You can then launch commands like:
 

@@ -133,6 +133,9 @@ async function getMistralModelsData(): Promise<string[]> {
   return await cache.get('mistralModels');
 }
 function getAnthropicModelsData() : string[] {
+  if (!config.has('anthropicKey') || config.get('anthropicKey') == '') {
+    return [];
+  }
   return [
     'claude-3-5-sonnet-20240620',
     'claude-3-opus-20240229',
