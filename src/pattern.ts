@@ -174,10 +174,17 @@ async function buildPattern() {
 export async function processPattern() {
     const options = getOptions();
     //options = opt;
-    if (!config.get('openAiKey'))
-        return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
     if (options.model && !await checkModel(options.model))
         return Format.error('Model not valid: select a model available in --list_models');
+    const provider = await getProvider(getModel());
+    if (provider == 'open-ai' && !config.get('openAiKey'))
+        return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');
+    else if (provider == 'google' && !config.get('googleKey'))
+        return Format.error('Google key not set. Set your OpenAI key with nunojs --setup');
+    else if (provider == 'mistral' && !config.get('mistralKey'))
+        return Format.error('Mistral key not set. Set your OpenAI key with nunojs --setup');
+    else if (provider == 'anthropic' && !config.get('anthropicKey'))
+        return Format.error('Anthropic key not set. Set your OpenAI key with nunojs --setup');
     if (!options.text) {
         loadPipedText();
     }
