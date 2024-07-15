@@ -22,9 +22,7 @@ export function updatePatterns() {
         const dir = './patterns/_updating_patterns';
         try {
             yield fse.ensureDir(dir);
-            // [TODO] change url to https://github.com/aldozorzi/nunojs - using https://github.com/danielmiessler/fabric because public
-            // const repoPath = 'https://github.com/aldozorzi/nunojs';
-            const repoPath = 'https://github.com/danielmiessler/fabric';
+            const repoPath = 'https://github.com/aldozorzi/nunojs';
             const git = simpleGit();
             yield git.clone(repoPath, dir, ['-n', '--depth=1', '--filter=tree:0']);
             git.cwd(dir).raw("sparse-checkout", "set", 'patterns');
