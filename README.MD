@@ -1,7 +1,7 @@
 
 # NunoJS
 
-NunoJS was born on an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. Further, my projects are mainly written in Javascript/Typescript and not in Python, so it's more convenient for me to have a JS version. Therefore i decided to reproduce the most important features (important to me, of course :D) in Nodejs so that I could use on my laptop and in my projects.
+NunoJS was born from an idea by [Daniel Miessler](https://danielmiessler.com), who developed [Fabric](https://github.com/danielmiessler/fabric). I desperately wanted to use it, but it didn't work on my Linux Alpine OS. Furthermore, my projects are primarily written in Javascript/TypeScript, not Python, making a JS version more convenient for me.  Therefore, I decided to recreate the most important features (important to me, of course!) in Node.js so I could use it on my laptop and in my projects.
 
 ## Installation
 
@@ -19,7 +19,7 @@ To start using NunoJS, simply launch
 
 and complete api key setup.
 
-Then you would like to launch something like 
+Then, you may want to launch:
 
 ` nunojs --default_model gpt-3.5-turbo `
 
@@ -27,9 +27,9 @@ to set a default model for your calls. Use
 
 ` nunojs --list_models `
 
-to get a list of all available models, baed on the API keys you set during --setup.
+to get a list of all available models, based on the API keys you set during --setup.
 
-Then you can launch something like
+You can then launch commands like:
 
 ` nunojs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.'`
 
@@ -41,7 +41,7 @@ All patterns are available as sub-commands too, so
 
 ` nunojs pattern_name 'Science is going to be revolutionized by AI assistants.' `
 
-is equal to
+is equivalent to:
 
 ` nunojs --pattern 'pattern_name' --text 'Science is going to be revolutionized by AI assistants.' `
 
@@ -49,9 +49,9 @@ Available patterns are listed with
 
 ` nunojs --list `
 
-You can add your own patterns to the folder `custom_patterns`. Look at readme file in the folder to get an idea, or read next chapter.
+You can add your own patterns to the `custom_patterns` folder. Refer to the README file in the folder for guidance, or read the next chapter.
 
-NunoJS accepts piped text as input (and returns "pipable" text as output), so you can use something like
+NunoJS accepts piped text as input (and returns "pipable" text as output), so you can use something like:
 
 ` 'Science is going to be revolutionized by AI assistants.' | nunojs pattern_name `
 
@@ -74,13 +74,15 @@ or
 
 ## Custom Patterns
 
-Place your custom patterns in "custom_patterns" folder. Create a subfolder named as your pattern and inside it put a file named "system.md". See pattern "official_pattern_template" in "pattern" folder as a reference.
+Place your custom patterns in the "custom_patterns" folder. Create a subfolder named after your pattern and put a file named "system.md" inside it. See the "official_pattern_template" pattern in the "pattern" folder as a reference.
 
 - custom_patterns
 	- pattern_1
 		- system.md
+		- user.md (optional, if you don't want to use --text param)
 	- pattern_2
 		- system.md
+		- user.md (optional, if you don't want to use --text param)
 
 ## All params:
 | Option                                           | Description                                                                                                                            |
