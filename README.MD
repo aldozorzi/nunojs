@@ -107,3 +107,10 @@ Place your custom patterns in the "custom_patterns" folder. Create a subfolder n
 | --ollama_server [server]                          | Set The URL of the remote ollamaserver to use.                                                                                         |
 | --debug                                           | Set debug mode                                                                                                                         |
 | -h, --help                                        | display help for command                                                                                                               |
+
+
+## YouTube utility:
+There is a YouTube utility which grabs videos transcript and use it as content to pipe into nunojs. It uses a non official API, so results are not guaranteed.
+Usage:
+
+`yt https://www.youtube.com/watch?v=wPEyyigh10g | nunojs extract_wisdom` #or any pattern you want

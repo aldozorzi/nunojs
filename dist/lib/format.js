@@ -34,7 +34,7 @@ export class Format {
 }
 Format.successColor = chalk.green;
 Format.errorColor = chalk.red;
-Format.infoColor = chalk.blue;
+Format.infoColor = chalk.cyan;
 Format.warningColor = chalk.yellow;
 Format.debugColor = chalk.magenta;
 //# sourceMappingURL=format.js.map

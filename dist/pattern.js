@@ -35,7 +35,7 @@ function loadPipedText() {
         const t = setTimeout(() => {
             process.stdin.removeAllListeners().end().destroy();
             buildPattern();
-        }, 100);
+        }, 500);
         options.text = '';
         try {
             for (var _d = true, _e = __asyncValues(process.stdin), _f; _f = yield _e.next(), _a = _f.done, !_a; _d = true) {

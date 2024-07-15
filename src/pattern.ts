@@ -30,7 +30,7 @@ async function loadPipedText() {
     const t = setTimeout(() => {
         process.stdin.removeAllListeners().end().destroy();
         buildPattern();
-    }, 100);
+    }, 500);
     options.text = '';
     for await (const chunk of process.stdin) {
         options.text += chunk;
@@ -147,8 +147,10 @@ async function manageResponse(chatCompletion:ChatCompletion | AsyncGenerator<Chu
     }
 }
 
+
 async function buildPattern() {
     const options = getOptions();
+
     spinner.start();
     try {
         let patternFile = await getPatternFile();

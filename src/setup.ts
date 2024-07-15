@@ -30,11 +30,13 @@ export async function initSetup() {
       name: 'mistralKey',
       message: `Paste your Mistral key${config.has('mistralKey') ? ' (blank to keep previous value)':''}: `,
     },
+    /*
     {
       type: 'input',
       name: 'YTKey',
       message: `Paste your YouTube key${config.has('YTKey') ? ' (blank to keep previous value)':''}: `,
     },
+    */
   ];
   inquirer.prompt(questions).then(answers => {
 

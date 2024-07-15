@@ -5,7 +5,7 @@ export class Format{
 
     static successColor = chalk.green;
     static errorColor = chalk.red;
-    static infoColor = chalk.blue;
+    static infoColor = chalk.cyan;
     static warningColor = chalk.yellow;
     static debugColor = chalk.magenta;
     
