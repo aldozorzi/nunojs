@@ -22,13 +22,14 @@ import fetch from 'node-fetch';
 import { Format } from "./lib/format.js";
 import { Cache } from 'file-system-cache';
 import { manageError } from "./error_manager.js";
-import { options } from "./index.js";
+import { getOptions } from './options.js';
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
 let showWarning = true;
 const cache = new Cache({
     ttl: 3600
 });
+const options = getOptions();
 function writeWarning(text) {
     if (showWarning && options.debug)
         Format.warning(text);

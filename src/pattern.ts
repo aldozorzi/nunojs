@@ -10,7 +10,10 @@ import { checkModel } from './list_models.js';
 import { Format } from './lib/format.js';
 import { getProvider } from './list_models.js';
 import { manageError } from './error_manager.js';
-import { options } from './index.js';
+import { getOptions, setOptions } from './options.js';
+import { ChatCompletion,Chunk} from '@ldazrz/llm-adapters/types.js'
+
+//var options = getOptions();
 
 interface Message {
     role: 'system' | 'user' | 'assistant';
@@ -23,6 +26,7 @@ const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`)
 //var options: OptionValues;
 
 async function loadPipedText() {
+    let options = getOptions();
     const t = setTimeout(() => {
         process.stdin.removeAllListeners().end().destroy();
         buildPattern();
@@ -31,11 +35,13 @@ async function loadPipedText() {
     for await (const chunk of process.stdin) {
         options.text += chunk;
     }
+    setOptions(options);
     clearTimeout(t);
     buildPattern();
 }
 
 function getModel(): string {
+    const options = getOptions();
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -65,6 +71,7 @@ async function getApiKey(): Promise<string> {
 }
 
 async function getPatternFile(): Promise<PathLike | false> {
+    const options = getOptions();
     let patternFile = `./patterns/${options.pattern}/system.md`;
     const customPatternFile = `./custom_patterns/${options.pattern}/system.md`;
 
@@ -79,6 +86,7 @@ async function getPatternFile(): Promise<PathLike | false> {
 }
 
 async function getUserFile(): Promise<PathLike | false> {
+    const options = getOptions();
     let userFile = `./patterns/${options.pattern}/user.md`;
     const customUserFile = `./custom_patterns/${options.pattern}/user.md`;
 
@@ -93,6 +101,7 @@ async function getUserFile(): Promise<PathLike | false> {
 }
 
 async function buildAdapter(system:string){
+    const options = getOptions();
     const provider = await getProvider(getModel());
         let adapterParams: Config = { provider: provider }
         if (provider == 'ollama') {
@@ -114,7 +123,8 @@ async function buildAdapter(system:string){
         manageResponse(chatCompletion);
 }
 
-async function manageResponse(chatCompletion:any){
+async function manageResponse(chatCompletion:ChatCompletion | AsyncGenerator<Chunk, void, unknown>){
+    const options = getOptions();
     if ('content' in chatCompletion) {
         if (options.output) {
             try {
@@ -138,6 +148,7 @@ async function manageResponse(chatCompletion:any){
 }
 
 async function buildPattern() {
+    const options = getOptions();
     spinner.start();
     try {
         let patternFile = await getPatternFile();
@@ -161,6 +172,7 @@ async function buildPattern() {
 }
 
 export async function processPattern() {
+    const options = getOptions();
     //options = opt;
     if (!config.get('openAiKey'))
         return Format.error('OpenAI key not set. Set your OpenAI key with nunojs --setup');

@@ -4,7 +4,7 @@ import fs from 'fs';
 import { Format } from './lib/format.js';
 
 import { Command, OptionValues } from 'commander';
-import { processPattern } from './pattern.js';
+import { setOptions } from './options.js';
 import { initSetup } from './setup.js';
 import { updatePatterns } from './update.js';
 import { getList } from './list.js';
@@ -13,9 +13,11 @@ import { defaultModel } from './default_model.js';
 import { ollamaServer } from './ollama_server.js';
 import { viewConfig } from './view_config.js';
 import { resetConfig } from './reset_config.js';
+import { processPattern } from './pattern.js';
 
 
 const program = new Command('nunojs');
+
 
 program
     .version('1.0.0')
@@ -73,7 +75,11 @@ try{
 }
 
 program.parse(process.argv);
-export const options: OptionValues = program.opts();
+const options = program.opts();
+setOptions(options);
+
+
+
 
 if(patternCommand != ''){
     options.pattern = patternCommand;
