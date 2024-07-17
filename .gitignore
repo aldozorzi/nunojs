@@ -1,6 +1,6 @@
 node_modules/*
 patterns/dev_*/*
-custom_patterns/*
+custom_patterns
 output/*
 TODO.MD
 .cache
