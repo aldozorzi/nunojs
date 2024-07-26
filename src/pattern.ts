@@ -22,7 +22,7 @@ interface Message {
 
 const packageJson = JSON.parse(fs.readFileSync('./package.json', 'utf8'));
 const config = new Configstore(packageJson.name);
-const spinner = ora({ text: Format.infoColor(`${getModel()} is working hard...`), color: 'cyan' })
+var spinner = ora({ text: '', color: 'cyan' })
 //var options: OptionValues;
 
 async function loadPipedText() {
@@ -42,6 +42,7 @@ async function loadPipedText() {
 
 function getModel(): string {
     const options = getOptions();
+    
     if (options.model)
         return options.model;
     else if (config.get('defaultModel'))
@@ -102,6 +103,7 @@ async function getUserFile(): Promise<PathLike | false> {
 
 async function buildAdapter(system:string){
     const options = getOptions();
+    
     const provider = await getProvider(getModel());
         let adapterParams: Config = { provider: provider }
         if (provider == 'ollama') {
@@ -109,7 +111,6 @@ async function buildAdapter(system:string){
         } else {
             adapterParams.apiKey = await getApiKey();
         }
-
         const adapter = new llmAdapter(adapterParams);
         const chatCompletion = await adapter.create({
             system: system,
@@ -125,6 +126,7 @@ async function buildAdapter(system:string){
 
 async function manageResponse(chatCompletion:ChatCompletion | AsyncGenerator<Chunk, void, unknown>){
     const options = getOptions();
+    
     if ('content' in chatCompletion) {
         if (options.output) {
             try {
@@ -150,6 +152,7 @@ async function manageResponse(chatCompletion:ChatCompletion | AsyncGenerator<Chu
 
 async function buildPattern() {
     const options = getOptions();
+    
 
     spinner.start();
     try {
@@ -175,6 +178,7 @@ async function buildPattern() {
 
 export async function processPattern() {
     const options = getOptions();
+    spinner.text = Format.infoColor(`${getModel()} is working hard...`);
     //options = opt;
     if (options.model && !await checkModel(options.model))
         return Format.error('Model not valid: select a model available in --list_models');
