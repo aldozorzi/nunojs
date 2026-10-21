@@ -1,3 +1,4 @@
+Unmaintained project, Agentic AI and skills usage made this anachronistic
 
 # NunoJS
 
